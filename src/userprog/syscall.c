@@ -107,18 +107,18 @@ syscall_handler (struct intr_frame *f)
 
       break;
     }
-    case SYS_READ:
+    case SYS_READ:{
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       char** buffer = get_buffer_arg(f);
       unsigned* size = get_size_arg(f);
       is_valid(fd);
-      is_valid(buffer);
       is_valid(size);
       is_valid_buffer(buffer, size);
 
       f->eax = sys_read(*fd,*buffer,*size);
       break;
+    }
     case SYS_WRITE: {
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
