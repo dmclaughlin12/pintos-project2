@@ -168,7 +168,7 @@ void exit(int exit_code){
   thread_exit();
 }
 
-int s_open(char* file){
+int sys_open(char* file){
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
@@ -194,7 +194,7 @@ int s_open(char* file){
     return retval;
 }
 
-int s_create(char* file, unsigned size) {
+int sys_create(char* file, unsigned size) {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     int retval;
@@ -205,7 +205,7 @@ int s_create(char* file, unsigned size) {
     return retval;
 }
 
-int s_filesize(int fd) {
+int sys_filesize(int fd) {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Return value defaults to negative 1.
@@ -228,7 +228,7 @@ int s_filesize(int fd) {
     lock_release(&file_lock);
     return retval;
 }
-int s_read(int fd, char* buf, unsigned size){
+int sys_read(int fd, char* buf, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize retval to 0.
@@ -294,7 +294,7 @@ int sys_write(int fd, char* buf, unsigned size){
       return retval;
 }
 
-void s_seek(int fd, unsigned position){
+void sys_seek(int fd, unsigned position){
     // Get the file operation lock.
     lock_acquire(&file_lock);
     struct thread* t = thread_current();
@@ -313,7 +313,7 @@ void s_seek(int fd, unsigned position){
     lock_release(&file_lock);
 }
 
-unsigned s_tell(int fd) {
+unsigned sys_tell(int fd) {
     struct thread* t = thread_current();
     struct list_elem *e;
     int retval = 0;
@@ -334,7 +334,7 @@ unsigned s_tell(int fd) {
     return retval;
 }
 
-void s_close(int fd){
+void sys_close(int fd){
     struct thread* t = thread_current();
     // Get the file operation lock.
     lock_acquire(&file_lock);
@@ -360,7 +360,7 @@ void s_close(int fd){
     lock_release(&file_lock);
 }
 
-int s_remove(char* name){
+int sys_remove(char* name){
     // Get the file operation lock.
     lock_acquire(&file_lock);
     int retval;
