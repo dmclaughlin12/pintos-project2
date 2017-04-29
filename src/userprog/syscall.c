@@ -391,7 +391,7 @@ unsigned * get_size_arg(struct intr_frame *f)
   return (unsigned*) ((char*) f->esp + 12);
 }
 
-void is_valid_buffer(char ** buffer, unsigned * size)
+void is_valid_buffer(void* buffer, unsigned * size)
 {
   is_valid(buffer);
   is_valid(*buffer);
