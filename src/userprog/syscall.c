@@ -72,7 +72,7 @@ syscall_handler (struct intr_frame *f)
       }
       unsigned *size = (unsigned*) ((char*)f->esp+8);
       is_valid(size);
-      f->eax = s_create(*raw,*size);
+      f->eax = sys_create(*raw,*size);
       break;
     }
     case SYS_REMOVE: {
@@ -83,7 +83,7 @@ syscall_handler (struct intr_frame *f)
       for(unsigned int i = 0; i < strlen(*raw); ++i){
       is_valid(*raw + i);
       }
-      f->eax = s_remove(*raw);
+      f->eax = sys_remove(*raw);
       break;
     }
     case SYS_OPEN: {
@@ -94,7 +94,7 @@ syscall_handler (struct intr_frame *f)
       for(unsigned int i = 0; i < strlen(*raw); ++i){
         is_valid(*raw + i);
       }
-      f->eax = s_open(*raw);
+      f->eax = sys_open(*raw);
       break;
     }
     case SYS_FILESIZE: {
@@ -102,7 +102,7 @@ syscall_handler (struct intr_frame *f)
       int *fd = (int*) ((char*)f->esp +4);
       is_valid(fd);
 
-      f->eax = s_filesize(*fd);
+      f->eax = sys_filesize(*fd);
 
       break;
     }
@@ -116,7 +116,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(size);
       is_valid_buffer(buffer, size);
 
-      f->eax = s_read(*fd,*buffer,*size);
+      f->eax = sys_read(*fd,*buffer,*size);
       break;
     case SYS_WRITE: {
       // Retrieve arguments and is_valid.
@@ -139,21 +139,21 @@ syscall_handler (struct intr_frame *f)
       is_valid(fd);
       unsigned* pos = (unsigned*) ((char*)f->esp + 8);
       is_valid(pos);
-      s_seek(*fd,*pos);
+      sys_seek(*fd,*pos);
       break;
     }
     case SYS_TELL: {
       // Retrieve arguments and is_valid.
       int* fd = (int*) ((char*)f->esp + 4);
       is_valid(fd);
-      f->eax = s_tell(*fd);
+      f->eax = sys_tell(*fd);
       break;
     }
     case SYS_CLOSE: {
       // Retrieve arguments and is_valid.
       int* fd = (int*) ((char*)f->esp + 4);
       is_valid(fd);
-      s_close(*fd);
+      sys_close(*fd);
       break;
     }
     default: {
