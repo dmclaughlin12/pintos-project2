@@ -128,7 +128,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(size);
 
       char** buffer = get_buffer_arg(f);
-      is_valid_buffer(buffer);
+      is_valid_buffer(buffer, 0);
 
       f->eax = sys_write(*fd,*buffer,*size);
 
