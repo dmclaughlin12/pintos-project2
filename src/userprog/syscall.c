@@ -33,10 +33,11 @@ syscall_handler (struct intr_frame *f)
   int* sys_call_number = (int*) f->esp;
   is_valid(sys_call_number);
   switch(*sys_call_number){
-    case SYS_HALT:
+    case SYS_HALT:{
       shutdown_power_off();
       break;
-    case SYS_EXIT:
+    }
+    case SYS_EXIT:{
       // Retrieve arguments and is_valid.
       int *exit_code = (int*) ((char*)f->esp + 4);
       is_valid(exit_code);
