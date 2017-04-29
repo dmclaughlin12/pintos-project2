@@ -393,8 +393,8 @@ unsigned * get_size_arg(struct intr_frame *f)
 
 void is_valid_buffer(char ** buffer, unsigned * size)
 {
-  is_valid_pointer(buffer);
-  is_valid_pointer(*buffer);
+  is_valid(buffer);
+  is_valid(*buffer);
   for(unsigned int i = 0; i < *size; ++i)
   {
         is_valid_pointer(*buffer + i);
