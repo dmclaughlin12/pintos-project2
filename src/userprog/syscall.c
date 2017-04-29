@@ -17,6 +17,7 @@
 int * get_fd_arg(struct intr_frame *f);
 char ** get_buffer_arg(struct intr_frame *f);
 unsigned* get_size_arg(struct intr_frame *f);
+void is_valid_buffer(char ** buffer, unsigned * size);
 static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
 void
@@ -32,17 +33,15 @@ syscall_handler (struct intr_frame *f)
   int* sys_call_number = (int*) f->esp;
   is_valid(sys_call_number);
   switch(*sys_call_number){
-    case SYS_HALT: {
+    case SYS_HALT:
       shutdown_power_off();
       break;
-    }
-    case SYS_EXIT: {
+    case SYS_EXIT:
       // Retrieve arguments and is_valid.
       int *exit_code = (int*) ((char*)f->esp + 4);
       is_valid(exit_code);
-      int retval = *exit_code;
-      f->eax = retval;
-      exit(retval);
+      f->eax = *exit_code;
+      exit(exit_code);
       break;
     }
     case SYS_EXEC: {
@@ -107,22 +106,18 @@ syscall_handler (struct intr_frame *f)
 
       break;
     }
-    case SYS_READ: {
+    case SYS_READ:
       // Retrieve arguments and is_valid.
-      int* fd = (int*) ((char*)f->esp +4);
-      char** raw = (char**) ((char*)f->esp+8);
-      unsigned* size = (unsigned*) ((char*)f->esp + 12);
+      int* fd = get_fd_arg(f);
+      char** buffer = get_buffer_arg(f);
+      unsigned* size = get_size_arg(f);
       is_valid(fd);
-      is_valid(raw);
+      is_valid(buffer);
       is_valid(size);
-      for(unsigned int i = 0; i < *size; ++i){
-      is_valid(*raw+i);
-      }
+      is_valid_buffer(buffer, size);
 
-      f->eax = s_read(*fd,*raw,*size);
-
+      f->eax = s_read(*fd,*buffer,*size);
       break;
-    }
     case SYS_WRITE: {
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
@@ -132,11 +127,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(size);
 
       char** buffer = get_buffer_arg(f);
-      is_valid(buffer);
-      is_valid(*buffer);
-      for(unsigned int i = 0; i < *size; ++i){
-        is_valid(*buffer + i);
-      }
+      is_valid_buffer(buffer);
 
       f->eax = sys_write(*fd,*buffer,*size);
 
@@ -397,4 +388,14 @@ char ** get_buffer_arg(struct intr_frame *f)
 unsigned * get_size_arg(struct intr_frame *f)
 {
   return (unsigned*) ((char*) f->esp + 12);
+}
+
+void is_valid_buffer(char ** buffer, unsigned * size)
+{
+  is_valid_pointer(buffer);
+  is_valid_pointer(*buffer);
+  for(unsigned int i = 0; i < *size; ++i)
+  {
+        is_valid_pointer(*buffer + i);
+    }
 }

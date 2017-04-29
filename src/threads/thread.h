@@ -119,13 +119,6 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-/*
-    struct shared_data
-
-    Holds data that needs to be shared between each parent process and its children.
-    Each shared_data struct is initialized by the child process, but can be de-allocated
-    by either the parent of child, depending on which process exits first.
-*/
 struct shared_data {
     int ref_count;
     struct lock ref_lock;
@@ -135,13 +128,6 @@ struct shared_data {
     struct list_elem child_elem;
 };
 
-/*
-    struct file_map
-
-    Holds a mapping between an integer "file descriptor" and the underlying 
-    struct file*. File descriptors are unique per process (not globally), and
-    are removed when the file is closed.
-*/
 struct fd_elem {
   int fd;                               /* Holds the file descriptor for this file. */
   struct file* file;                    /* Holds the actual file* for this file. */
