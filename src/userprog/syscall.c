@@ -17,6 +17,7 @@
 int * get_fd_arg(struct intr_frame *f);
 char ** get_buffer_arg(struct intr_frame *f);
 unsigned* get_size_arg(struct intr_frame *f);
+void is_valid_buffer(char** buffer, unsigned * size);
 static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
 void
@@ -30,112 +31,107 @@ static void
 syscall_handler (struct intr_frame *f) 
 {
   int* sys_call_number = (int*) f->esp;
-  validate(sys_call_number);
+  is_valid(sys_call_number);
   switch(*sys_call_number){
-    case SYS_HALT: {
+    case SYS_HALT:{
       shutdown_power_off();
       break;
     }
-    case SYS_EXIT: {
-      // Retrieve arguments and validate.
+    case SYS_EXIT:{
+      // Retrieve arguments and is_valid.
       int *exit_code = (int*) ((char*)f->esp + 4);
-      validate(exit_code);
-      int retval = *exit_code;
-      f->eax = retval;
-      exit(retval);
+      is_valid(exit_code);
+      f->eax = *exit_code;
+      exit(exit_code);
       break;
     }
     case SYS_EXEC: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       char** raw = (char**) ((char*)f->esp+4);
-      validate(raw);
-      validate(*raw);
+      is_valid(raw);
+      is_valid(*raw);
       for(unsigned int i = 0; i < strlen(*raw); ++i){
-        validate(*raw + i);
+        is_valid(*raw + i);
       }
       f->eax = process_execute(*raw);
       break;
     }
     case SYS_WAIT: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       pid_t *wait_pid = (pid_t*) ((char*)f->esp + 4);
-      validate(wait_pid);
+      is_valid(wait_pid);
       f->eax = process_wait(*wait_pid);
       break;
     }
     case SYS_CREATE: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       char** raw = (char**) ((char*)f->esp+4);
-      validate(raw);
-      validate(*raw);
+      is_valid(raw);
+      is_valid(*raw);
       for(unsigned int i = 0; i < strlen(*raw); ++i){
-        validate(*raw + i);
+        is_valid(*raw + i);
       }
       unsigned *size = (unsigned*) ((char*)f->esp+8);
-      validate(size);
-      f->eax = s_create(*raw,*size);
+      is_valid(size);
+      f->eax = sys_create(*raw,*size);
       break;
     }
     case SYS_REMOVE: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       char** raw = (char**) ((char*)f->esp+4);
-      validate(raw);
-      validate(*raw);
+      is_valid(raw);
+      is_valid(*raw);
       for(unsigned int i = 0; i < strlen(*raw); ++i){
-      validate(*raw + i);
+      is_valid(*raw + i);
       }
-      f->eax = s_remove(*raw);
+      f->eax = sys_remove(*raw);
       break;
     }
     case SYS_OPEN: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       char** raw = (char**) ((char*)f->esp+4);
-      validate(raw);
-      validate(*raw);
+      is_valid(raw);
+      is_valid(*raw);
       for(unsigned int i = 0; i < strlen(*raw); ++i){
-        validate(*raw + i);
+        is_valid(*raw + i);
       }
-      f->eax = s_open(*raw);
+      f->eax = sys_open(*raw);
       break;
     }
     case SYS_FILESIZE: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       int *fd = (int*) ((char*)f->esp +4);
-      validate(fd);
+      is_valid(fd);
 
-      f->eax = s_filesize(*fd);
+      f->eax = sys_filesize(*fd);
 
       break;
     }
-    case SYS_READ: {
-      // Retrieve arguments and validate.
-      int* fd = (int*) ((char*)f->esp +4);
-      char** raw = (char**) ((char*)f->esp+8);
-      unsigned* size = (unsigned*) ((char*)f->esp + 12);
-      validate(fd);
-      validate(raw);
-      validate(size);
-      for(unsigned int i = 0; i < *size; ++i){
-      validate(*raw+i);
-      }
+    case SYS_READ:{
+      // Retrieve arguments and is_valid.
+      int* fd = get_fd_arg(f);
+      char** buffer = get_buffer_arg(f);
+      unsigned* size = get_size_arg(f);
+      is_valid(fd);
+      is_valid(size);
+      is_valid_buffer(buffer, size);
 
-      f->eax = s_read(*fd,*raw,*size);
-
+      f->eax = sys_read(*fd,*buffer,*size);
       break;
     }
     case SYS_WRITE: {
       // Retrieve arguments and validate.
       int* fd = get_fd_arg(f);
-      validate(fd);
+      is_valid(fd);
 
       unsigned* size = get_size_arg(f);
-      validate(size);
+      is_valid(size);
 
       char** buffer = get_buffer_arg(f);
-      validate(buffer);
-      validate(*buffer);
+      is_valid(buffer);
+      is_valid(*buffer);
       for(unsigned int i = 0; i < *size; ++i){
-        validate(*buffer + i);
+        is_valid(*buffer + i);
       }
 
       f->eax = sys_write(*fd,*buffer,*size);
@@ -143,26 +139,26 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_SEEK: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       int* fd = (int*) ((char*)f->esp + 4);
-      validate(fd);
+      is_valid(fd);
       unsigned* pos = (unsigned*) ((char*)f->esp + 8);
-      validate(pos);
-      s_seek(*fd,*pos);
+      is_valid(pos);
+      sys_seek(*fd,*pos);
       break;
     }
     case SYS_TELL: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       int* fd = (int*) ((char*)f->esp + 4);
-      validate(fd);
-      f->eax = s_tell(*fd);
+      is_valid(fd);
+      f->eax = sys_tell(*fd);
       break;
     }
     case SYS_CLOSE: {
-      // Retrieve arguments and validate.
+      // Retrieve arguments and is_valid.
       int* fd = (int*) ((char*)f->esp + 4);
-      validate(fd);
-      s_close(*fd);
+      is_valid(fd);
+      sys_close(*fd);
       break;
     }
     default: {
@@ -176,7 +172,7 @@ void exit(int exit_code){
   thread_exit();
 }
 
-int s_open(char* file){
+int sys_open(char* file){
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
@@ -202,7 +198,7 @@ int s_open(char* file){
     return retval;
 }
 
-int s_create(char* file, unsigned size) {
+int sys_create(char* file, unsigned size) {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     int retval;
@@ -213,7 +209,7 @@ int s_create(char* file, unsigned size) {
     return retval;
 }
 
-int s_filesize(int fd) {
+int sys_filesize(int fd) {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Return value defaults to negative 1.
@@ -236,7 +232,7 @@ int s_filesize(int fd) {
     lock_release(&file_lock);
     return retval;
 }
-int s_read(int fd, char* buf, unsigned size){
+int sys_read(int fd, char* buf, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize retval to 0.
@@ -302,7 +298,7 @@ int sys_write(int fd, char* buf, unsigned size){
       return retval;
 }
 
-void s_seek(int fd, unsigned position){
+void sys_seek(int fd, unsigned position){
     // Get the file operation lock.
     lock_acquire(&file_lock);
     struct thread* t = thread_current();
@@ -321,7 +317,7 @@ void s_seek(int fd, unsigned position){
     lock_release(&file_lock);
 }
 
-unsigned s_tell(int fd) {
+unsigned sys_tell(int fd) {
     struct thread* t = thread_current();
     struct list_elem *e;
     int retval = 0;
@@ -342,7 +338,7 @@ unsigned s_tell(int fd) {
     return retval;
 }
 
-void s_close(int fd){
+void sys_close(int fd){
     struct thread* t = thread_current();
     // Get the file operation lock.
     lock_acquire(&file_lock);
@@ -368,7 +364,7 @@ void s_close(int fd){
     lock_release(&file_lock);
 }
 
-int s_remove(char* name){
+int sys_remove(char* name){
     // Get the file operation lock.
     lock_acquire(&file_lock);
     int retval;
@@ -397,4 +393,14 @@ char ** get_buffer_arg(struct intr_frame *f)
 unsigned * get_size_arg(struct intr_frame *f)
 {
   return (unsigned*) ((char*) f->esp + 12);
+}
+
+void is_valid_buffer(char** buffer, unsigned* size)
+{
+  is_valid(buffer);
+  is_valid(*buffer);
+  for(unsigned int i = 0; i < *size; ++i)
+  {
+        is_valid(*buffer + i);
+    }
 }
