@@ -289,7 +289,7 @@ int sys_write(int fd, char* buf, unsigned size){
             if(fd_e->fd == fd){
               // Write to the file if found.
               written_bytes = file_write(fd_e->file,buf,size);
-              printf("%s bytes\n", written_bytes );
+              printf("%d bytes\n", written_bytes );
               break;
             }
           }
