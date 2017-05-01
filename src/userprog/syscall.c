@@ -397,6 +397,6 @@ void is_valid_buffer(char* buffer, unsigned* size)
   is_valid(*buffer);
   for(unsigned int i = 0; i < *size; ++i)
   {
-        is_valid(**buffer + i);
+        is_valid(*buffer + i);
     }
 }
