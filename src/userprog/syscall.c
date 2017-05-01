@@ -48,7 +48,7 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_EXEC: {
       // Retrieve arguments and is_valid.
-      char** buffer = get_buffer_arg(f);
+      char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer(buffer);
