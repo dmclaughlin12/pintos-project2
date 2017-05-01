@@ -109,7 +109,7 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_READ: {
       // Retrieve arguments and is_valid.
-      int* fd = (int*) ((char*)f->esp +4);
+      int* fd = get_fd_arg(f);
       char** raw = (char**) ((char*)f->esp+8);
       unsigned* size = (unsigned*) ((char*)f->esp + 12);
       is_valid(fd);
