@@ -70,7 +70,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer(buffer, strlen(*buffer));
       unsigned *size = (unsigned*) get_buffer_arg(f);
       is_valid(size);
-      f->eax = s_create(*raw,*size);
+      f->eax = s_create(*buffer,*size);
       break;
     }
     case SYS_REMOVE: {
@@ -89,7 +89,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(*buffer);
       is_valid_buffer(buffer, strlen(*buffer));
 
-      f->eax = s_open(*raw);
+      f->eax = s_open(*buffer);
       break;
     }
     case SYS_FILESIZE: {
@@ -104,15 +104,15 @@ syscall_handler (struct intr_frame *f)
     case SYS_READ: {
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
-      char** raw = get_buffer_arg(f);
+      char** buffer = get_buffer_arg(f);
       unsigned* size = get_size_arg(f);
       is_valid(fd);
-      is_valid(raw);
+      is_valid(buffer);
       is_valid(size);
-      is_valid_buffer(raw, size);
+      is_valid_buffer(buffer, size);
 
 
-      f->eax = s_read(*fd,*raw,*size);
+      f->eax = s_read(*fd,*buffer,*size);
 
       break;
     }
