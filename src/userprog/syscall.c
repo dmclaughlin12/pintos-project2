@@ -117,25 +117,22 @@ syscall_handler (struct intr_frame *f)
       unsigned* size = get_size_arg(f);
       is_valid(fd);
       is_valid(size);
+      is_valid(buffer);
+      is_valid(*buffer);
       is_valid_buffer(buffer, size);
 
       f->eax = sys_read(*fd,*buffer,*size);
       break;
     }
     case SYS_WRITE: {
-      // Retrieve arguments and validate.
-      int* fd = (int*) ((char*)f->esp +4);
+      int* fd = get_fd_arg(f);
+      char** buffer = get_buffer_arg(f);
+      unsigned* size = get_size_arg(f);
       is_valid(fd);
-
-      unsigned* size = (unsigned*) ((char*)f->esp + 12);
       is_valid(size);
-
-      char** buffer = (char**) ((char*)f->esp+8);
       is_valid(buffer);
       is_valid(*buffer);
-      for(unsigned int i = 0; i < *size; ++i){
-        is_valid(*buffer + i);
-      }
+      is_valid_buffer(buffer, size);
 
       f->eax = sys_write(*fd,*buffer,*size);
 
@@ -400,8 +397,6 @@ unsigned * get_size_arg(struct intr_frame *f)
 
 void is_valid_buffer(char** buffer, unsigned* size)
 {
-  is_valid(buffer);
-  is_valid(*buffer);
   for(unsigned int i = 0; i < *size; ++i)
   {
         is_valid(*buffer + i);
