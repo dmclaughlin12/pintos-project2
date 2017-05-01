@@ -41,9 +41,8 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       int *exit_code = (int*) ((char*)f->esp + 4);
       is_valid(exit_code);
-      int retval = *exit_code;
-      f->eax = retval;
-      exit(retval);
+      f->eax = *exit_code;
+      exit(*exit_code);
       break;
     }
     case SYS_EXEC: {
@@ -116,7 +115,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(fd);
       is_valid(raw);
       is_valid(size);
-      is_valid_buffer(&raw, &size);
+      is_valid_buffer(raw, size);
 
 
       f->eax = s_read(*fd,*raw,*size);
