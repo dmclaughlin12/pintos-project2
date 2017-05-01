@@ -68,7 +68,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer_size(buffer, strlen(*buffer));
+      is_valid_buffer(buffer);
       unsigned *size = (unsigned*) get_buffer_arg(f);
       is_valid(size);
       f->eax = s_create(*buffer,*size);
@@ -79,7 +79,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer_size(buffer, strlen(*buffer));
+      is_valid_buffer(buffer);
 
       f->eax = s_remove(*buffer);
       break;
@@ -88,7 +88,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer_size(buffer, strlen(*buffer));
+      is_valid_buffer_size(buffer);
 
       f->eax = s_open(*buffer);
       break;
