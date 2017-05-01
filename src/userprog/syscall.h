@@ -36,6 +36,6 @@ unsigned sys_tell(int fd);
 int sys_filesize(int fd);
 
 /* Deletes the file called file. Returns true if successful, false otherwise. */
-int s_remove(char* name);
+int sys_remove(char* name);
 #endif /* userprog/syscall.h */
 
