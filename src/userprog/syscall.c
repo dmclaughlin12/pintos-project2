@@ -125,7 +125,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(fd);
 
       unsigned* size = get_size_arg(f);
-      validate(size);
+      is_valid(size);
 
       char** buffer = get_buffer_arg(f);
       is_valid(buffer);
