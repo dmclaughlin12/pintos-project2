@@ -111,7 +111,7 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       char** raw = get_buffer_arg(f);
-      unsigned* size = (unsigned*) ((char*)f->esp + 12);
+      unsigned* size = get_size_arg(f);
       is_valid(fd);
       is_valid(raw);
       is_valid(size);
