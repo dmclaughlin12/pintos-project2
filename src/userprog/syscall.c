@@ -116,7 +116,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(fd);
       is_valid(raw);
       is_valid(size);
-      is_valid_buffer(*raw, *size);
+      is_valid_buffer(&raw, &size);
 
 
       f->eax = s_read(*fd,*raw,*size);
