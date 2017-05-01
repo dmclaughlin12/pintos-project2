@@ -17,7 +17,7 @@
 int * get_fd_arg(struct intr_frame *f);
 char ** get_buffer_arg(struct intr_frame *f);
 unsigned* get_size_arg(struct intr_frame *f);
-void is_valid_buffer(char *** buffer, unsigned** size);
+void is_valid_buffer(char ** buffer, unsigned* size);
 static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
 void
@@ -398,9 +398,9 @@ unsigned * get_size_arg(struct intr_frame *f)
 {
   return (unsigned*) ((char*) f->esp + 12);
 }
-void is_valid_buffer(char *** buffer, unsigned ** size)
+void is_valid_buffer(char ** buffer, unsigned * size)
 {
-    for(unsigned int i = 0; i < size; ++i){
-      is_valid(buffer+i);
+    for(unsigned int i = 0; i < *size; ++i){
+      is_valid(*buffer+i);
     }
 }
