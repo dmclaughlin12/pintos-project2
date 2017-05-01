@@ -271,11 +271,11 @@ int sys_write(int fd, char* buf, unsigned size){
       // Get the file operation lock.
       lock_acquire(&file_lock);
       // Initialize return value to 0.
-      int retval = 0;
+      int written_bytes = 0;
       // If this is a console write, call putbuf().
       if (fd == 1){
         putbuf(buf,size);
-        retval = size;
+        written_bytes = size;
       }
       // Otherwise, this is a file write, so search for the correct file
       // descriptor in the thread's fd_elem.
@@ -288,14 +288,14 @@ int sys_write(int fd, char* buf, unsigned size){
             struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
             if(fd_e->fd == fd){
               // Write to the file if found.
-              retval = file_write(fd_e->file,buf,size);
-              break;
+              written_bytes = file_write(fd_e->file,buf,size);
+              // break;
             }
           }
       }
       // Release the file operation lock.
       lock_release(&file_lock);
-      return retval;
+      return written_bytes;
 }
 
 void sys_seek(int fd, unsigned position){
