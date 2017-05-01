@@ -17,7 +17,8 @@
 int * get_fd_arg(struct intr_frame *f);
 char ** get_buffer_arg(struct intr_frame *f);
 unsigned* get_size_arg(struct intr_frame *f);
-void is_valid_buffer(char ** buffer, unsigned* size);
+void is_valid_buffer_size(char ** buffer, unsigned* size);
+void is_valid_buffer(char ** buffer);
 static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
 void
@@ -50,7 +51,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = get_buffer_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer(buffer, strlen(*buffer));
+      is_valid_buffer(buffer);
     
       f->eax = process_execute(*buffer);
       break;
@@ -67,7 +68,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer(buffer, strlen(*buffer));
+      is_valid_buffer_size(buffer, strlen(*buffer));
       unsigned *size = (unsigned*) get_buffer_arg(f);
       is_valid(size);
       f->eax = s_create(*buffer,*size);
@@ -78,7 +79,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer(buffer, strlen(*buffer));
+      is_valid_buffer_size(buffer, strlen(*buffer));
 
       f->eax = s_remove(*buffer);
       break;
@@ -87,7 +88,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = (char**) get_fd_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer(buffer, strlen(*buffer));
+      is_valid_buffer_size(buffer, strlen(*buffer));
 
       f->eax = s_open(*buffer);
       break;
@@ -109,7 +110,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(fd);
       is_valid(buffer);
       is_valid(size);
-      is_valid_buffer(buffer, size);
+      is_valid_buffer_size(buffer, size);
 
 
       f->eax = s_read(*fd,*buffer,*size);
@@ -127,7 +128,7 @@ syscall_handler (struct intr_frame *f)
       char** buffer = get_buffer_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
-      is_valid_buffer(buffer, size);
+      is_valid_buffer_size(buffer, size);
 
       f->eax = sys_write(*fd,*buffer,*size);
 
@@ -389,9 +390,18 @@ unsigned * get_size_arg(struct intr_frame *f)
 {
   return (unsigned*) ((char*) f->esp + 12);
 }
-void is_valid_buffer(char ** buffer, unsigned * size)
+void is_valid_buffer_size(char ** buffer, unsigned * size)
 {
     for(unsigned int i = 0; i < *size; ++i){
       is_valid(*buffer+i);
     }
+}
+
+void is_valid_buffer(char ** buffer)
+{
+  int size = strlen(*buffer);
+  for (int i = 0; i < size; ++i)
+  {
+    is_valid(*buffer+i);
+  }
 }
