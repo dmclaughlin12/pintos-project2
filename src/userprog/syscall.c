@@ -124,10 +124,10 @@ syscall_handler (struct intr_frame *f)
       int* fd = (int*) ((char*)f->esp +4);
       is_valid(fd);
 
-      unsigned* size = get_size_arg(f);
+      unsigned* size = (unsigned*) ((char*)f->esp + 12);
       is_valid(size);
 
-      char** buffer = get_buffer_arg(f);
+      char** buffer = (char**) ((char*)f->esp+8);
       is_valid(buffer);
       is_valid(*buffer);
       for(unsigned int i = 0; i < *size; ++i){
