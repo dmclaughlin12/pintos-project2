@@ -39,7 +39,7 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_EXIT: {
       // Retrieve arguments and is_valid.
-      int *exit_code = (int*) ((char*)f->esp + 4);
+      int *exit_code = get_fd_arg(f);
       is_valid(exit_code);
       f->eax = *exit_code;
       exit(*exit_code);
@@ -47,60 +47,54 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_EXEC: {
       // Retrieve arguments and is_valid.
-      char** raw = (char**) ((char*)f->esp+4);
-      is_valid(raw);
-      is_valid(*raw);
-      for(unsigned int i = 0; i < strlen(*raw); ++i){
-        is_valid(*raw + i);
-      }
-      f->eax = process_execute(*raw);
+      char** buffer = get_buffer_arg(f);
+      is_valid(buffer);
+      is_valid(*buffer);
+      is_valid_buffer(buffer, strlen(*buffer));
+    
+      f->eax = process_execute(*buffer);
       break;
     }
     case SYS_WAIT: {
       // Retrieve arguments and is_valid.
-      pid_t *wait_pid = (pid_t*) ((char*)f->esp + 4);
+      pid_t *wait_pid = (pid_t*) get_fd_arg(f);
       is_valid(wait_pid);
       f->eax = process_wait(*wait_pid);
       break;
     }
     case SYS_CREATE: {
       // Retrieve arguments and is_valid.
-      char** raw = (char**) ((char*)f->esp+4);
-      is_valid(raw);
-      is_valid(*raw);
-      for(unsigned int i = 0; i < strlen(*raw); ++i){
-        is_valid(*raw + i);
-      }
-      unsigned *size = (unsigned*) ((char*)f->esp+8);
+      char** buffer = (char**) get_fd_arg(f);
+      is_valid(buffer);
+      is_valid(*buffer);
+      is_valid_buffer(buffer, strlen(*buffer));
+      unsigned *size = (unsigned*) get_buffer_arg(f);
       is_valid(size);
       f->eax = s_create(*raw,*size);
       break;
     }
     case SYS_REMOVE: {
       // Retrieve arguments and is_valid.
-      char** raw = (char**) ((char*)f->esp+4);
-      is_valid(raw);
-      is_valid(*raw);
-      for(unsigned int i = 0; i < strlen(*raw); ++i){
-      is_valid(*raw + i);
-      }
-      f->eax = s_remove(*raw);
+      char** buffer = (char**) get_fd_arg(f);
+      is_valid(buffer);
+      is_valid(*buffer);
+      is_valid_buffer(buffer, strlen(*buffer));
+
+      f->eax = s_remove(*buffer);
       break;
     }
     case SYS_OPEN: {
-      // Retrieve arguments and is_valid.
-      char** raw = (char**) ((char*)f->esp+4);
-      is_valid(raw);
-      is_valid(*raw);
-      for(unsigned int i = 0; i < strlen(*raw); ++i){
-        is_valid(*raw + i);
-      }
+      char** buffer = (char**) get_fd_arg(f);
+      is_valid(buffer);
+      is_valid(*buffer);
+      is_valid_buffer(buffer, strlen(*buffer));
+
       f->eax = s_open(*raw);
       break;
     }
     case SYS_FILESIZE: {
       // Retrieve arguments and is_valid.
-      int *fd = (int*) ((char*)f->esp +4);
+      int *fd = get_fd_arg(f);
       is_valid(fd);
 
       f->eax = s_filesize(*fd);
@@ -141,23 +135,23 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_SEEK: {
       // Retrieve arguments and is_valid.
-      int* fd = (int*) ((char*)f->esp + 4);
+      int* fd = get_fd_arg(f);
       is_valid(fd);
-      unsigned* pos = (unsigned*) ((char*)f->esp + 8);
+      unsigned* pos = (unsigned*) get_buffer_arg(f);
       is_valid(pos);
       s_seek(*fd,*pos);
       break;
     }
     case SYS_TELL: {
       // Retrieve arguments and is_valid.
-      int* fd = (int*) ((char*)f->esp + 4);
+      int* fd = get_fd_arg(f);
       is_valid(fd);
       f->eax = s_tell(*fd);
       break;
     }
     case SYS_CLOSE: {
       // Retrieve arguments and is_valid.
-      int* fd = (int*) ((char*)f->esp + 4);
+      int* fd = get_fd_arg(f);
       is_valid(fd);
       s_close(*fd);
       break;
