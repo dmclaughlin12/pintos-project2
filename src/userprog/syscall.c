@@ -120,20 +120,19 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_WRITE: {
-      // Retrieve arguments and is_valid.
+      // Retrieve arguments and validate.
       int* fd = get_fd_arg(f);
-      is_valid(fd);
+      validate(fd);
 
       unsigned* size = get_size_arg(f);
-      is_valid(size);
+      validate(size);
 
       char** buffer = get_buffer_arg(f);
-        is_valid(buffer);
-  is_valid(*buffer);
-  for(unsigned int i = 0; i < *size; ++i)
-  {
-        is_valid(*buffer + i);
-    }
+      validate(buffer);
+      validate(*buffer);
+      for(unsigned int i = 0; i < *size; ++i){
+        validate(*buffer + i);
+      }
 
       f->eax = sys_write(*fd,*buffer,*size);
 
