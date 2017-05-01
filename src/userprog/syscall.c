@@ -121,7 +121,7 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_WRITE: {
       // Retrieve arguments and validate.
-      int* fd = get_fd_arg(f);
+      int* fd = (int*) ((char*)f->esp +4);
       is_valid(fd);
 
       unsigned* size = get_size_arg(f);
