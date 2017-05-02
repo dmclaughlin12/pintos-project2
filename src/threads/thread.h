@@ -129,7 +129,7 @@ struct thread
 struct shared_data {
     int ref_count;
     struct lock ref_lock;
-    int exit_code;
+    int status;
     tid_t tid;
     struct semaphore dead_sema;
     struct list_elem child_elem;
