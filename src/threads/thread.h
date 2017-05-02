@@ -109,7 +109,15 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
-    struct shared_data {
+
+
+
+#ifdef USERPROG
+    /* Owned by userprog/process.c. */
+    uint32_t *pagedir;                  /* Page directory. */
+#endif
+
+        struct shared_data {
     int ref_count;
     struct lock ref_lock;
     int exit_code;
@@ -123,12 +131,6 @@ struct fd_elem {
   struct file* file;                    /* Holds the actual file* for this file. */
   struct list_elem file_elem;           /* Allows the file to be an element in a list. */
 };
-
-
-#ifdef USERPROG
-    /* Owned by userprog/process.c. */
-    uint32_t *pagedir;                  /* Page directory. */
-#endif
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
