@@ -109,6 +109,21 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+    struct shared_data {
+    int ref_count;
+    struct lock ref_lock;
+    int exit_code;
+    tid_t tid;
+    struct semaphore dead_sema;
+    struct list_elem child_elem;
+};
+
+struct fd_elem {
+  int fd;                               /* Holds the file descriptor for this file. */
+  struct file* file;                    /* Holds the actual file* for this file. */
+  struct list_elem file_elem;           /* Allows the file to be an element in a list. */
+};
+
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -119,34 +134,6 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-/*
-    struct shared_data
-
-    Holds data that needs to be shared between each parent process and its children.
-    Each shared_data struct is initialized by the child process, but can be de-allocated
-    by either the parent of child, depending on which process exits first.
-*/
-struct shared_data {
-    int ref_count;
-    struct lock ref_lock;
-    int exit_code;
-    tid_t tid;
-    struct semaphore dead_sema;
-    struct list_elem child_elem;
-};
-
-/*
-    struct file_map
-
-    Holds a mapping between an integer "file descriptor" and the underlying 
-    struct file*. File descriptors are unique per process (not globally), and
-    are removed when the file is closed.
-*/
-struct fd_elem {
-  int fd;                               /* Holds the file descriptor for this file. */
-  struct file* file;                    /* Holds the actual file* for this file. */
-  struct list_elem file_elem;           /* Allows the file to be an element in a list. */
-};
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.

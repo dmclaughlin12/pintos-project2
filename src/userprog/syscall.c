@@ -71,7 +71,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer(buffer);
       unsigned *size = (unsigned*) get_buffer_arg(f);
       is_valid(size);
-      f->eax = s_create(*buffer,*size);
+      f->eax = sys_create(*buffer,*size);
       break;
     }
     case SYS_REMOVE: {
@@ -81,7 +81,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(*buffer);
       is_valid_buffer(buffer);
 
-      f->eax = s_remove(*buffer);
+      f->eax = sys_remove(*buffer);
       break;
     }
     case SYS_OPEN: {
@@ -90,7 +90,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(*buffer);
       is_valid_buffer(buffer);
 
-      f->eax = s_open(*buffer);
+      f->eax = sys_open(*buffer);
       break;
     }
     case SYS_FILESIZE: {
@@ -113,7 +113,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer_size(buffer, size);
 
 
-      f->eax = s_read(*fd,*buffer,*size);
+      f->eax = sys_read(*fd,*buffer,*size);
 
       break;
     }
@@ -147,14 +147,14 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       is_valid(fd);
-      f->eax = s_tell(*fd);
+      f->eax = sys_tell(*fd);
       break;
     }
     case SYS_CLOSE: {
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       is_valid(fd);
-      s_close(*fd);
+      sys_close(*fd);
       break;
     }
     default: {
@@ -168,7 +168,7 @@ void exit(int exit_code){
   thread_exit();
 }
 
-int s_open(char* file){
+int sys_open(char* file){
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
@@ -194,7 +194,7 @@ int s_open(char* file){
     return retval;
 }
 
-int s_create(char* file, unsigned size) {
+int sys_create(char* file, unsigned size) {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     int retval;
@@ -205,7 +205,7 @@ int s_create(char* file, unsigned size) {
     return retval;
 }
 
-int s_filesize(int fd) {
+int sys_filesize(int fd) {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Return value defaults to negative 1.
@@ -228,7 +228,7 @@ int s_filesize(int fd) {
     lock_release(&file_lock);
     return retval;
 }
-int s_read(int fd, char* buf, unsigned size){
+int sys_read(int fd, char* buf, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize retval to 0.
@@ -294,7 +294,7 @@ int sys_write(int fd, char* buf, unsigned size){
       return retval;
 }
 
-void s_seek(int fd, unsigned position){
+void sys_seek(int fd, unsigned position){
     // Get the file operation lock.
     lock_acquire(&file_lock);
     struct thread* t = thread_current();
@@ -313,7 +313,7 @@ void s_seek(int fd, unsigned position){
     lock_release(&file_lock);
 }
 
-unsigned s_tell(int fd) {
+unsigned sys_tell(int fd) {
     struct thread* t = thread_current();
     struct list_elem *e;
     int retval = 0;
@@ -334,7 +334,7 @@ unsigned s_tell(int fd) {
     return retval;
 }
 
-void s_close(int fd){
+void sys_close(int fd){
     struct thread* t = thread_current();
     // Get the file operation lock.
     lock_acquire(&file_lock);
@@ -360,7 +360,7 @@ void s_close(int fd){
     lock_release(&file_lock);
 }
 
-int s_remove(char* name){
+int sys_remove(char* name){
     // Get the file operation lock.
     lock_acquire(&file_lock);
     int retval;
@@ -400,7 +400,7 @@ void is_valid_buffer_size(char ** buffer, unsigned * size)
 void is_valid_buffer(char ** buffer)
 {
   int size = strlen(*buffer);
-  for (int i = 0; i < size; ++i)
+  for (int i = 0; i < size; ++i) 
   {
     is_valid(*buffer+i);
   }
