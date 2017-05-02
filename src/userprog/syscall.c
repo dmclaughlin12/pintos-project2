@@ -40,10 +40,10 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_EXIT: {
       // Retrieve arguments and is_valid.
-      int *exit_code = get_fd_arg(f);
-      is_valid(exit_code);
-      f->eax = *exit_code;
-      exit(*exit_code);
+      int *status = get_fd_arg(f);
+      is_valid(status);
+      f->eax = *status;
+      exit(*status);
       break;
     }
     case SYS_EXEC: {
@@ -162,9 +162,17 @@ syscall_handler (struct intr_frame *f)
     }
   }
 }
-void exit(int exit_code){
+
+/*
+ * Terminates the current user program, returning status to the kernel.
+ * If the process's parent waits for it, this is the status that will
+ * be returned.
+ */
+void 
+exit(int status)
+{
   struct thread *t = thread_current();
-  t->parent_share->exit_code = exit_code;
+  t->parent_share->status = status;
   thread_exit();
 }
 
