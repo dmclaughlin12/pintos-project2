@@ -36,7 +36,7 @@ syscall_handler (struct intr_frame *f)
   is_valid(sys_call_number);
   switch(*sys_call_number){
     case SYS_HALT: {
-      shutdown_power_off();
+      halt();
       break;
     }
     case SYS_EXIT: {
@@ -163,7 +163,16 @@ syscall_handler (struct intr_frame *f)
     }
   }
 }
-
+/*
+ * Terminates Pintos by calling shutdown_power_off(). This 
+ * should be avoided because you lose some information about possible
+ * deadlock situations, etc.
+ */
+void 
+halt(void)
+{
+  shutdown_power_off();
+}
 /*
  * Terminates the current user program, returning status to the kernel.
  * If the process's parent waits for it, this is the status that will
