@@ -88,7 +88,7 @@ start_process (void *in_data)
   sema_init(&share->dead_sema,0);
   lock_init(&share->ref_lock);
   share->tid = thread_current()->tid;
-  share->exit_code = -2;
+  share->status = -2;
   share->ref_count = 2;
 
   data->shared = share;
@@ -109,7 +109,7 @@ start_process (void *in_data)
   /* If load failed, quit. */
   //palloc_free_page (data);
   if (!data->load_success){ 
-    share->exit_code = -1;
+    share->status = -1;
     sema_up(&data->load_sema);
     thread_exit ();
   }else{
@@ -147,7 +147,7 @@ process_wait (tid_t child_tid)
       if(share->tid == child_tid){
         sema_down(&share->dead_sema);
         list_remove(&share->child_elem);
-        int exit_val = share->exit_code;
+        int exit_val = share->status;
         free(share);
         return exit_val;
       }
@@ -163,7 +163,7 @@ process_exit (void)
   uint32_t *pd;
 
   char* thr_name = thread_name();
-  printf("%s: exit(%d)\n",thr_name,cur->parent_share->exit_code);
+  printf("%s: exit(%d)\n",thr_name,cur->parent_share->status);
   sema_up(&cur->parent_share->dead_sema);
   // If the child outlives the parent, the child must deallocate the
   // shared memory.
