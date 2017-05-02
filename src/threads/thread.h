@@ -110,20 +110,17 @@ struct thread
     struct list_elem elem;              /* List element. */
 
 
-
-
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
 
-
-
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-        struct shared_data {
+
+struct shared_data {
     int ref_count;
     struct lock ref_lock;
     int exit_code;
