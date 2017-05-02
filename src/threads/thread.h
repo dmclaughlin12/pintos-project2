@@ -117,6 +117,12 @@ struct thread
     uint32_t *pagedir;                  /* Page directory. */
 #endif
 
+
+
+    /* Owned by thread.c. */
+    unsigned magic;                     /* Detects stack overflow. */
+  };
+
         struct shared_data {
     int ref_count;
     struct lock ref_lock;
@@ -131,11 +137,6 @@ struct fd_elem {
   struct file* file;                    /* Holds the actual file* for this file. */
   struct list_elem file_elem;           /* Allows the file to be an element in a list. */
 };
-
-    /* Owned by thread.c. */
-    unsigned magic;                     /* Detects stack overflow. */
-  };
-
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
