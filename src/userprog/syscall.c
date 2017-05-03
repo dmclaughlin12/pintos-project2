@@ -91,7 +91,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(*buffer);
       is_valid_buffer(buffer);
 
-      f->eax = s_open(*buffer);
+      f->eax = open(*buffer);
       break;
     }
     case SYS_FILESIZE: {
@@ -186,7 +186,11 @@ exit(int status)
   thread_exit();
 }
 
-int s_open(char* file){
+/*
+ * Opens the file called file.  Returns a nonnegative integer handle called
+ * a file descriptor or -1 if the file could not be opened.
+ */
+int open(char* file){
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
