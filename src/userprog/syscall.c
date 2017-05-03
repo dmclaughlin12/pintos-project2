@@ -122,7 +122,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer_size(buffer, size);
 
 
-      f->eax = read(*fd,*buffer,*size);
+      f->eax = read(*fd,(void *)buffer,*size);
 
       break;
     }
