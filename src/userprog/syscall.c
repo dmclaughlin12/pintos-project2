@@ -30,7 +30,7 @@ bool create (const char*file, unsigned initial_size);
 bool remove(const char *file);
 int open (const char *file);
 int filesize(intfd);
-int read(intfd, void*buffer,unsigned size);
+int read(int fd, void* buffer,unsigned size);
 void
 syscall_init (void) 
 {
@@ -304,7 +304,7 @@ int read(int fd, void* buffer, unsigned size){
       // Get as many characters from the console as specified in
       // The size argument.
       for(unsigned int i = 0; i < size; ++i){
-        buf[i] = input_getc();
+        buffer[i] = input_getc();
       }
         return_value = size;
     }
@@ -319,7 +319,7 @@ int read(int fd, void* buffer, unsigned size){
           struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
           if(fd_e->fd == fd){
             // If found read the file.
-            return_value = file_read(fd_e->file,buf,size);
+            return_value = file_read(fd_e->file,buffer,size);
             break;
           }
         }
