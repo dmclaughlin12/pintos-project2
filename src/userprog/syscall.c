@@ -31,6 +31,8 @@ bool remove(const char *file);
 int open (const char *file);
 int filesize(intfd);
 
+
+void seek(int fd, unsigned position);
 void
 syscall_init (void) 
 {
@@ -130,17 +132,13 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       is_valid(fd);
-
       unsigned* size = get_size_arg(f);
       is_valid(size);
-
       char** buffer = get_buffer_arg(f);
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer_size(buffer, size);
-
       f->eax = sys_write(*fd,*buffer,*size);
-
       break;
     }
     case SYS_SEEK: {
@@ -149,7 +147,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(fd);
       unsigned* pos = (unsigned*) get_buffer_arg(f);
       is_valid(pos);
-      s_seek(*fd,*pos);
+      seek(*fd,*pos);
       break;
     }
     case SYS_TELL: {
@@ -360,22 +358,23 @@ int sys_write(int fd, char* buf, unsigned size){
       return return_value;
 }
 
-void s_seek(int fd, unsigned position){
-    // Get the file operation lock.
-    lock_acquire(&file_lock);
-    struct thread* t = thread_current();
-    struct list_elem *e;
-    for (e = list_begin (&t->files); e != list_end (&t->files);
-      e = list_next (e))
+void 
+seek(int fd, unsigned position)
+{
+  // Get the file operation lock.
+  lock_acquire(&file_lock);
+  struct thread* t = thread_current();
+  struct list_elem *e;
+  for (e = list_begin (&t->files); e != list_end (&t->files);
+    e = list_next (e))
+    {
+      struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+      if(fd_e->fd == fd)
       {
-        struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
-        if(fd_e->fd == fd){
-            // Seek to requested position if the file is found.
-            file_seek(fd_e->file,position);
-            break;
-        }
+        file_seek(fd_e->file,position);
+        break;
       }
-    // Release the file operation lock.
+    }
     lock_release(&file_lock);
 }
 
