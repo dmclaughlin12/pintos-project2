@@ -115,7 +115,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer_size(buffer, size);
 
 
-      f->eax = s_read(*fd,*buffer,*size);
+      f->eax = read(*fd,*buffer,*size);
 
       break;
     }
@@ -197,14 +197,14 @@ open(const char* file)
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
-    int retval;
+    int return_value;
     struct file* open_file = filesys_open(file);
     // Create a new fd_elem struct, which contains a mapping from a
     // file descriptor to an inode.
     struct fd_elem* fm = (struct fd_elem*) malloc(sizeof(struct fd_elem));
     if(open_file == NULL)
     {
-      retval = -1;
+      return_value = -1;
     }
     else
     {
@@ -215,11 +215,11 @@ open(const char* file)
       // Add file to the list of this thread's files.
       list_push_back(&t->files,&fm->file_elem);
       // Return value is the file descriptor.
-      retval = fm->fd;
+      return_value = fm->fd;
     }
     // Release the file operation lock.
     lock_release(&file_lock);
-    return retval;
+    return return_value;
 }
 
 int 
@@ -228,7 +228,7 @@ filesize(int fd)
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Return value defaults to negative 1.
-    int retval = -1;
+    int return_value = -1;
     struct thread* t = thread_current();
     struct list_elem *e;
     // Loop through list to find the file with the given file descriptor.
@@ -239,32 +239,26 @@ filesize(int fd)
         if(fd_e->fd == fd)
 	{
             // Set return value if found.
-            retval = file_length(fd_e->file);
+            return_value = file_length(fd_e->file);
             break;
           }
       
       }
     // Release the file operation lock.
     lock_release(&file_lock);
-    return retval;
+    return return_value;
 }
-
-int s_create(char* file, unsigned size) {
+/**
+ * Reads size bytes from the file open as fd into buffer.  Returns the number
+ * of bytes actually read, or -1 if the file could not be read.
+ */
+int 
+read(int fd, char* buf, unsigned size)
+{
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
-    int retval;
-    // Call filesys_create with the given file and size.
-    retval = filesys_create(file,size);
-    // Release the file system lock.
-    lock_release(&file_lock);
-    return retval;
-}
-
-int s_read(int fd, char* buf, unsigned size){
-    // Acquire the file operation lock.
-    lock_acquire(&file_lock);
-    // Initialize retval to 0.
-    int retval = 0;
+    // Initialize return_value to 0.
+    int return_value = 0;
     // Check if this is a console read.
     if(fd == 0){
       // Get as many characters from the console as specified in
@@ -272,7 +266,7 @@ int s_read(int fd, char* buf, unsigned size){
       for(unsigned int i = 0; i < size; ++i){
         buf[i] = input_getc();
       }
-        retval = size;
+        return_value = size;
     }
     // Otherwise, it is a file read. Search for the file in the thread's
     // file descriptor list.
@@ -285,7 +279,7 @@ int s_read(int fd, char* buf, unsigned size){
           struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
           if(fd_e->fd == fd){
             // If found read the file.
-            retval = file_read(fd_e->file,buf,size);
+            return_value = file_read(fd_e->file,buf,size);
             break;
           }
         }
@@ -293,17 +287,28 @@ int s_read(int fd, char* buf, unsigned size){
     // Release the file operation lock.
     lock_release(&file_lock);
     // Return the number of bytes read.
-    return retval;
+    return return_value;
 }
+int s_create(char* file, unsigned size) {
+    // Acquire the file operation lock.
+    lock_acquire(&file_lock);
+    int return_value;
+    // Call filesys_create with the given file and size.
+    return_value = filesys_create(file,size);
+    // Release the file system lock.
+    lock_release(&file_lock);
+    return return_value;
+}
+
 int sys_write(int fd, char* buf, unsigned size){
       // Get the file operation lock.
       lock_acquire(&file_lock);
       // Initialize return value to 0.
-      int retval = 0;
+      int return_value = 0;
       // If this is a console write, call putbuf().
       if (fd == 1){
         putbuf(buf,size);
-        retval = size;
+        return_value = size;
       }
       // Otherwise, this is a file write, so search for the correct file
       // descriptor in the thread's fd_elem.
@@ -316,14 +321,14 @@ int sys_write(int fd, char* buf, unsigned size){
             struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
             if(fd_e->fd == fd){
               // Write to the file if found.
-              retval = file_write(fd_e->file,buf,size);
+              return_value = file_write(fd_e->file,buf,size);
               break;
             }
           }
       }
       // Release the file operation lock.
       lock_release(&file_lock);
-      return retval;
+      return return_value;
 }
 
 void s_seek(int fd, unsigned position){
@@ -348,7 +353,7 @@ void s_seek(int fd, unsigned position){
 unsigned s_tell(int fd) {
     struct thread* t = thread_current();
     struct list_elem *e;
-    int retval = 0;
+    int return_value = 0;
     // Get the file operation lock.
     lock_acquire(&file_lock);
     for (e = list_begin (&t->files); e != list_end (&t->files);
@@ -357,13 +362,13 @@ unsigned s_tell(int fd) {
         struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
         if(fd_e->fd == fd){
             // Return the position of the cursor in the file.
-            retval = file_tell(fd_e->file);
+            return_value = file_tell(fd_e->file);
             break;
         }
       }
     // Release the file operation lock.
     lock_release(&file_lock);
-    return retval;
+    return return_value;
 }
 
 void s_close(int fd){
@@ -395,12 +400,12 @@ void s_close(int fd){
 int s_remove(char* name){
     // Get the file operation lock.
     lock_acquire(&file_lock);
-    int retval;
+    int return_value;
     // Remove the file with the given.
-    retval = filesys_remove(name);
+    return_value = filesys_remove(name);
     // Release the file operation lock.
     lock_release(&file_lock);
-    return retval;
+    return return_value;
 }
 
 void is_valid(void* addr){
