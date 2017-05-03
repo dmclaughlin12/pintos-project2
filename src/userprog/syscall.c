@@ -190,6 +190,12 @@ exit(int status)
   thread_exit();
 }
 
+/*
+ * Runs the executable whose name is given in cmd_line, passing any given
+ * argumaents, and returns the new process's program id.  Must return pid 
+ * -1 which otherwise should not be a vild pid, if the program cannot 
+ *  load or run for any reason.
+ */
 pid_t 
 exec(const char* cmd_line)
 {
