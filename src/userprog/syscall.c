@@ -190,7 +190,7 @@ exit(int status)
  * Opens the file called file.  Returns a nonnegative integer handle called
  * a file descriptor or -1 if the file could not be opened.
  */
-int open(char* file){
+int open(const char* file){
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
