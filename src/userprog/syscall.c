@@ -34,6 +34,7 @@ int filesize(intfd);
 
 void seek(int fd, unsigned position);
 unsigned tell(int fd);
+void close(int fd);
 void
 syscall_init (void) 
 {
@@ -162,7 +163,7 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       is_valid(fd);
-      s_close(*fd);
+      close(*fd);
       break;
     }
     default: {
@@ -383,6 +384,10 @@ seek(int fd, unsigned position)
     lock_release(&file_lock);
 }
 
+/*
+ * Returns the position of the next byte to be read or written in open file
+ * fd, expressed in bytes from the beginning of the file.
+ */
 unsigned 
 tell(int fd) 
 {
@@ -404,30 +409,33 @@ tell(int fd)
   return return_value;
 }
 
-void s_close(int fd){
-    struct thread* t = thread_current();
-    // Get the file operation lock.
-    lock_acquire(&file_lock);
-    if(fd != 0 && fd != 1){
-      struct list_elem *e;
-      // Loop through each file in the thread's fd list.
-      for (e = list_begin (&t->files); e != list_end (&t->files);
-        e = list_next (e))
-        {
-          struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
-          if(fd_e->fd == fd){
-            // Remove from the list.
-            list_remove(e);
-            // Close the file.
-            file_close(fd_e->file);
-            // Free the memory used for this file.
-            free(fd_e);
-            break;
-          }
-        }
+/*
+ * Closes the file descriptor fd. Exiting or terminating a process implicitly
+ * closes all of its open file descriptors as if by calling this function for 
+ * each one.
+ */
+void 
+close(int fd)
+{
+  struct thread* t = thread_current();
+  lock_acquire(&file_lock);
+  if(fd != 0 && fd != 1)
+  {
+    struct list_elem *e;
+    for (e = list_begin (&t->files); e != list_end (&t->files);
+         e = list_next (e))
+    {
+      struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+      if(fd_e->fd == fd)
+      {
+        list_remove(e);
+        file_close(fd_e->file);
+        free(fd_e);
+        break;
+      }
     }
-    // Release the file operation lock.
-    lock_release(&file_lock);
+  }
+  lock_release(&file_lock);
 }
 
 void is_valid(void* addr){
