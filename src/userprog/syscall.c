@@ -190,22 +190,27 @@ exit(int status)
  * Opens the file called file.  Returns a nonnegative integer handle called
  * a file descriptor or -1 if the file could not be opened.
  */
-int open(const char* file){
+int 
+open(const char* file)
+{
   // Acquire the file operation lock.
     lock_acquire(&file_lock);
     struct thread *t = thread_current();
     int retval;
-    struct file* op = filesys_open(file);
+    struct file* open_file = filesys_open(file);
     // Create a new fd_elem struct, which contains a mapping from a
     // file descriptor to an inode.
     struct fd_elem* fm = (struct fd_elem*) malloc(sizeof(struct fd_elem));
-    if(op == NULL){
+    if(open_file == NULL)
+    {
       retval = -1;
-    }else{
+    }
+    else
+    {
       // Get the next available file descriptor.
       fm->fd = ++t->next_fd;
       // Set the file pointer to the opened file.
-      fm->file = op;
+      fm->file = open_file;
       // Add file to the list of this thread's files.
       list_push_back(&t->files,&fm->file_elem);
       // Return value is the file descriptor.
