@@ -28,7 +28,9 @@ pid_t exec (const char*cmd_line);
 int wait(pid_t pid);
 bool create (const char*file, unsigned initial_size);
 bool remove(const char *file);
+int open (const char *file);
 int filesize(intfd);
+int read(intfd, void*buffer,unsigned size);
 void
 syscall_init (void) 
 {
@@ -120,7 +122,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer_size(buffer, size);
 
 
-      f->eax = s_read(*fd,*buffer,*size);
+      f->eax = read(*fd,*buffer,*size);
 
       break;
     }
@@ -250,62 +252,49 @@ bool remove(const char *file)
 int 
 open(const char* file)
 {
-  // Acquire the file operation lock.
-    lock_acquire(&file_lock);
-    struct thread *t = thread_current();
-    int return_value;
-    struct file* open_file = filesys_open(file);
-    // Create a new fd_elem struct, which contains a mapping from a
-    // file descriptor to an inode.
-    struct fd_elem* fm = (struct fd_elem*) malloc(sizeof(struct fd_elem));
-    if(open_file == NULL)
-    {
-      return_value = -1;
-    }
-    else
-    {
-      // Get the next available file descriptor.
-      fm->fd = ++t->next_fd;
-      // Set the file pointer to the opened file.
-      fm->file = open_file;
-      // Add file to the list of this thread's files.
-      list_push_back(&t->files,&fm->file_elem);
-      // Return value is the file descriptor.
-      return_value = fm->fd;
-    }
-    // Release the file operation lock.
-    lock_release(&file_lock);
-    return return_value;
+  lock_acquire(&file_lock);
+  struct thread *t = thread_current();
+  int return_value;
+  struct file* open_file = filesys_open(file);
+  struct fd_elem* fm = (struct fd_elem*) malloc(sizeof(struct fd_elem));
+  if(open_file == NULL)
+  {
+    return_value = -1;
+  }
+  else
+  {
+    fm->fd = ++t->next_fd;
+    fm->file = open_file;
+    list_push_back(&t->files,&fm->file_elem);
+    return_value = fm->fd;
+  }
+  lock_release(&file_lock);
+  return return_value;
 }
 
 int 
 filesize(int fd) 
 {
-    // Acquire the file operation lock.
-    lock_acquire(&file_lock);
-    // Return value defaults to negative 1.
-    int return_value = -1;
-    struct thread* t = thread_current();
-    struct list_elem *e;
-    // Loop through list to find the file with the given file descriptor.
-    for (e = list_begin (&t->files); e != list_end (&t->files);
-      e = list_next (e))
+  lock_acquire(&file_lock);
+  int return_value = -1;
+  struct thread* t = thread_current();
+  struct list_elem *e;
+  for (e = list_begin (&t->files); e != list_end (&t->files);
+    e = list_next (e))
+    {
+      struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+      if(fd_e->fd == fd)
       {
-        struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
-        if(fd_e->fd == fd)
-	{
-            // Set return value if found.
-            return_value = file_length(fd_e->file);
-            break;
-          }
-      
+        return_value = file_length(fd_e->file);
+        break;
       }
-    // Release the file operation lock.
-    lock_release(&file_lock);
-    return return_value;
+      
+    }
+  lock_release(&file_lock);
+  return return_value;
 }
 
-int s_read(int fd, char* buf, unsigned size){
+int read(int fd, void* buffer, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize return_value to 0.
