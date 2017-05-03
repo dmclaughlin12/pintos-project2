@@ -22,6 +22,8 @@ void is_valid_buffer_size(char ** buffer, unsigned* size);
 void is_valid_buffer(char ** buffer);
 static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
+void halt(void);
+void exit(int status);
 int filesize(intfd);
 void
 syscall_init (void) 
