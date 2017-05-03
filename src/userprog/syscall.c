@@ -30,7 +30,7 @@ bool create (const char*file, unsigned initial_size);
 bool remove(const char *file);
 int open (const char *file);
 int filesize(intfd);
-int read(int fd, void* buffer,unsigned size);
+
 void
 syscall_init (void) 
 {
@@ -122,7 +122,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer_size(buffer, size);
 
 
-      f->eax = read(*fd,(void *)buffer,*size);
+      f->eax = s_read(*fd,*buffer,*size);
 
       break;
     }
@@ -294,7 +294,7 @@ filesize(int fd)
   return return_value;
 }
 
-int read(int fd, void* buffer, unsigned size){
+int s_read(int fd, char* buf, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize return_value to 0.
@@ -304,7 +304,7 @@ int read(int fd, void* buffer, unsigned size){
       // Get as many characters from the console as specified in
       // The size argument.
       for(unsigned int i = 0; i < size; ++i){
-        buffer[i] = input_getc();
+        buf[i] = input_getc();
       }
         return_value = size;
     }
@@ -319,7 +319,7 @@ int read(int fd, void* buffer, unsigned size){
           struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
           if(fd_e->fd == fd){
             // If found read the file.
-            return_value = file_read(fd_e->file,buffer,size);
+            return_value = file_read(fd_e->file,buf,size);
             break;
           }
         }
