@@ -24,6 +24,8 @@ static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
 void halt(void);
 void exit(int status);
+pid_t exec (const char*cmd_line);
+
 int filesize(intfd);
 void
 syscall_init (void) 
@@ -56,8 +58,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer(buffer);
-    
-      f->eax = process_execute(*buffer);
+      f->eax = exec(*buffer);
       break;
     }
     case SYS_WAIT: {
@@ -189,6 +190,12 @@ exit(int status)
   thread_exit();
 }
 
+pid_t 
+exec(const char* cmd_line)
+{
+  pid_t id = process_execute(cmd_line);
+  return id;
+}
 /*
  * Opens the file called file.  Returns a nonnegative integer handle called
  * a file descriptor or -1 if the file could not be opened.
