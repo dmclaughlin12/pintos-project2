@@ -33,6 +33,7 @@ int filesize(intfd);
 
 
 void seek(int fd, unsigned position);
+unsigned tell(int fd);
 void
 syscall_init (void) 
 {
@@ -154,7 +155,7 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       int* fd = get_fd_arg(f);
       is_valid(fd);
-      f->eax = s_tell(*fd);
+      f->eax = tell(*fd);
       break;
     }
     case SYS_CLOSE: {
@@ -358,6 +359,10 @@ int sys_write(int fd, char* buf, unsigned size){
       return return_value;
 }
 
+/*
+ * Changes the next byte to be read or written in open file fd to position,
+ * expressed in bytes from the beginning of the file.
+ */
 void 
 seek(int fd, unsigned position)
 {
@@ -378,25 +383,25 @@ seek(int fd, unsigned position)
     lock_release(&file_lock);
 }
 
-unsigned s_tell(int fd) {
-    struct thread* t = thread_current();
-    struct list_elem *e;
-    int return_value = 0;
-    // Get the file operation lock.
-    lock_acquire(&file_lock);
-    for (e = list_begin (&t->files); e != list_end (&t->files);
+unsigned 
+tell(int fd) 
+{
+  struct thread* t = thread_current();
+  struct list_elem *e;
+  int return_value = 0;
+  lock_acquire(&file_lock);
+  for (e = list_begin (&t->files); e != list_end (&t->files);
       e = list_next (e))
-      {
-        struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
-        if(fd_e->fd == fd){
-            // Return the position of the cursor in the file.
-            return_value = file_tell(fd_e->file);
-            break;
-        }
-      }
-    // Release the file operation lock.
-    lock_release(&file_lock);
-    return return_value;
+  {
+    struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+    if(fd_e->fd == fd)
+    {
+      return_value = file_tell(fd_e->file);
+      break;
+    }
+  }
+  lock_release(&file_lock);
+  return return_value;
 }
 
 void s_close(int fd){
