@@ -22,6 +22,7 @@ void is_valid_buffer_size(char ** buffer, unsigned* size);
 void is_valid_buffer(char ** buffer);
 static void syscall_handler (struct intr_frame *);
 static struct lock file_lock;
+int filesize(intfd);
 void
 syscall_init (void) 
 {
@@ -99,7 +100,7 @@ syscall_handler (struct intr_frame *f)
       int *fd = get_fd_arg(f);
       is_valid(fd);
 
-      f->eax = s_filesize(*fd);
+      f->eax = filesize(*fd);
 
       break;
     }
@@ -221,18 +222,9 @@ open(const char* file)
     return retval;
 }
 
-int s_create(char* file, unsigned size) {
-    // Acquire the file operation lock.
-    lock_acquire(&file_lock);
-    int retval;
-    // Call filesys_create with the given file and size.
-    retval = filesys_create(file,size);
-    // Release the file system lock.
-    lock_release(&file_lock);
-    return retval;
-}
-
-int s_filesize(int fd) {
+int 
+filesize(int fd) 
+{
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Return value defaults to negative 1.
@@ -244,7 +236,8 @@ int s_filesize(int fd) {
       e = list_next (e))
       {
         struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
-        if(fd_e->fd == fd){
+        if(fd_e->fd == fd)
+	{
             // Set return value if found.
             retval = file_length(fd_e->file);
             break;
@@ -255,6 +248,18 @@ int s_filesize(int fd) {
     lock_release(&file_lock);
     return retval;
 }
+
+int s_create(char* file, unsigned size) {
+    // Acquire the file operation lock.
+    lock_acquire(&file_lock);
+    int retval;
+    // Call filesys_create with the given file and size.
+    retval = filesys_create(file,size);
+    // Release the file system lock.
+    lock_release(&file_lock);
+    return retval;
+}
+
 int s_read(int fd, char* buf, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
