@@ -400,7 +400,7 @@ int s_remove(char* name){
     return_value = filesys_remove(name);
     // Release the file operation lock.
     lock_release(&file_lock);
-    return retval;
+    return return_value;
 }
 
 void is_valid(void* addr){
