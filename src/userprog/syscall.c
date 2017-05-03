@@ -26,6 +26,7 @@ void halt(void);
 void exit(int status);
 pid_t exec (const char*cmd_line);
 int wait(pid_t pid);
+bool create (const char*file, unsigned initial_size);
 int filesize(intfd);
 void
 syscall_init (void) 
@@ -76,7 +77,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer(buffer);
       unsigned *size = (unsigned*) get_buffer_arg(f);
       is_valid(size);
-      f->eax = s_create(*buffer,*size);
+      f->eax = create(*buffer,*size);
       break;
     }
     case SYS_REMOVE: {
@@ -212,6 +213,20 @@ wait(pid_t pid)
   int status = process_wait(pid);
   return status;
 }
+
+/*
+ * Creates a new file called file initially initial_size bytes in size
+ * returns true if successful, false otherwise.
+ */
+bool 
+create(const char* file, unsigned initial_size) 
+{
+  lock_acquire(&file_lock);
+  bool successfully_creates = filesys_create(file,initial_size);
+  lock_release(&file_lock);
+  return successfully_creates;
+}
+
 /*
  * Opens the file called file.  Returns a nonnegative integer handle called
  * a file descriptor or -1 if the file could not be opened.
@@ -270,17 +285,6 @@ filesize(int fd)
       
       }
     // Release the file operation lock.
-    lock_release(&file_lock);
-    return return_value;
-}
-
-int s_create(char* file, unsigned size) {
-    // Acquire the file operation lock.
-    lock_acquire(&file_lock);
-    int return_value;
-    // Call filesys_create with the given file and size.
-    return_value = filesys_create(file,size);
-    // Release the file system lock.
     lock_release(&file_lock);
     return return_value;
 }
