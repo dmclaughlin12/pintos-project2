@@ -115,7 +115,7 @@ syscall_handler (struct intr_frame *f)
       is_valid_buffer_size(buffer, size);
 
 
-      f->eax = read(*fd,*buffer,*size);
+      f->eax = s_read(*fd,*buffer,*size);
 
       break;
     }
@@ -248,13 +248,19 @@ filesize(int fd)
     lock_release(&file_lock);
     return return_value;
 }
-/**
- * Reads size bytes from the file open as fd into buffer.  Returns the number
- * of bytes actually read, or -1 if the file could not be read.
- */
-int 
-read(int fd, char* buf, unsigned size)
-{
+
+int s_create(char* file, unsigned size) {
+    // Acquire the file operation lock.
+    lock_acquire(&file_lock);
+    int return_value;
+    // Call filesys_create with the given file and size.
+    return_value = filesys_create(file,size);
+    // Release the file system lock.
+    lock_release(&file_lock);
+    return return_value;
+}
+
+int s_read(int fd, char* buf, unsigned size){
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize return_value to 0.
@@ -289,17 +295,6 @@ read(int fd, char* buf, unsigned size)
     // Return the number of bytes read.
     return return_value;
 }
-int s_create(char* file, unsigned size) {
-    // Acquire the file operation lock.
-    lock_acquire(&file_lock);
-    int return_value;
-    // Call filesys_create with the given file and size.
-    return_value = filesys_create(file,size);
-    // Release the file system lock.
-    lock_release(&file_lock);
-    return return_value;
-}
-
 int sys_write(int fd, char* buf, unsigned size){
       // Get the file operation lock.
       lock_acquire(&file_lock);
@@ -405,7 +400,7 @@ int s_remove(char* name){
     return_value = filesys_remove(name);
     // Release the file operation lock.
     lock_release(&file_lock);
-    return return_value;
+    return retval;
 }
 
 void is_valid(void* addr){
