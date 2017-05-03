@@ -25,7 +25,7 @@ static struct lock file_lock;
 void halt(void);
 void exit(int status);
 pid_t exec (const char*cmd_line);
-
+int wait(pid_t pid);
 int filesize(intfd);
 void
 syscall_init (void) 
@@ -65,7 +65,7 @@ syscall_handler (struct intr_frame *f)
       // Retrieve arguments and is_valid.
       pid_t *wait_pid = (pid_t*) get_fd_arg(f);
       is_valid(wait_pid);
-      f->eax = process_wait(*wait_pid);
+      f->eax = wait(*wait_pid);
       break;
     }
     case SYS_CREATE: {
@@ -201,6 +201,16 @@ exec(const char* cmd_line)
 {
   pid_t id = process_execute(cmd_line);
   return id;
+}
+
+/*
+ * Waits for a chld process pid and retrieves the child's exit status.
+ */
+int 
+wait(pid_t pid)
+{
+  int status = process_wait(pid);
+  return status;
 }
 /*
  * Opens the file called file.  Returns a nonnegative integer handle called
