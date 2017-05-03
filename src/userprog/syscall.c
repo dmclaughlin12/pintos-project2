@@ -27,6 +27,7 @@ void exit(int status);
 pid_t exec (const char*cmd_line);
 int wait(pid_t pid);
 bool create (const char*file, unsigned initial_size);
+bool remove(const char *file);
 int filesize(intfd);
 void
 syscall_init (void) 
@@ -87,7 +88,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(*buffer);
       is_valid_buffer(buffer);
 
-      f->eax = s_remove(*buffer);
+      f->eax = remove(*buffer);
       break;
     }
     case SYS_OPEN: {
@@ -222,9 +223,24 @@ bool
 create(const char* file, unsigned initial_size) 
 {
   lock_acquire(&file_lock);
-  bool successfully_creates = filesys_create(file,initial_size);
+  bool successfully_creates_file; 
+  successfully_creates_file= filesys_create(file,initial_size);
   lock_release(&file_lock);
   return successfully_creates;
+}
+
+/*
+ * Deletes the file called file.  Returns true if successful, false otherwise.
+ * A file may be removed regardless of whether it is open or closed, and removing
+ * an open file does not close it.
+ */
+bool remove(const char *file)
+{
+  lock_acquire(&file_lock);
+  bool successfully_deleted_file;
+  successfully_deleted_file = filesys_remove(name);
+  lock_release(&file_lock);
+  return successfully_deleted_file;
 }
 
 /*
@@ -419,17 +435,6 @@ void s_close(int fd){
     }
     // Release the file operation lock.
     lock_release(&file_lock);
-}
-
-int s_remove(char* name){
-    // Get the file operation lock.
-    lock_acquire(&file_lock);
-    int return_value;
-    // Remove the file with the given.
-    return_value = filesys_remove(name);
-    // Release the file operation lock.
-    lock_release(&file_lock);
-    return return_value;
 }
 
 void is_valid(void* addr){
