@@ -226,7 +226,7 @@ create(const char* file, unsigned initial_size)
   bool successfully_creates_file; 
   successfully_creates_file= filesys_create(file,initial_size);
   lock_release(&file_lock);
-  return successfully_creates;
+  return successfully_creates_file;
 }
 
 /*
@@ -238,7 +238,7 @@ bool remove(const char *file)
 {
   lock_acquire(&file_lock);
   bool successfully_deleted_file;
-  successfully_deleted_file = filesys_remove(name);
+  successfully_deleted_file = filesys_remove(file);
   lock_release(&file_lock);
   return successfully_deleted_file;
 }
