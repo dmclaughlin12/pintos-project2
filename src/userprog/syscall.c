@@ -249,7 +249,7 @@ open(const char* file)
   {
     fm->fd = ++t->next_fd;
     fm->file = open_file;
-    list_push_back(&t->files,&fm->file_elem);
+    list_push_back(&t->open_files,&fm->file_elem);
     return_value = fm->fd;
   }
   lock_release(&file_lock);
@@ -263,7 +263,7 @@ filesize(int fd)
   int return_value = -1;
   struct thread* t = thread_current();
   struct list_elem *e;
-  for (e = list_begin (&t->files); e != list_end (&t->files);
+  for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
     e = list_next (e))
     {
       struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
@@ -297,7 +297,7 @@ int s_read(int fd, char* buf, unsigned size){
     else{
       struct thread* t = thread_current();
       struct list_elem *e;
-      for (e = list_begin (&t->files); e != list_end (&t->files);
+      for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
         e = list_next (e))
         {
           struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
@@ -328,7 +328,7 @@ int sys_write(int fd, char* buf, unsigned size){
       else{
         struct thread* t = thread_current();
         struct list_elem *e;
-        for (e = list_begin (&t->files); e != list_end (&t->files);
+        for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
           e = list_next (e))
           {
             struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
@@ -355,7 +355,7 @@ seek(int fd, unsigned position)
   lock_acquire(&file_lock);
   struct thread* t = thread_current();
   struct list_elem *e;
-  for (e = list_begin (&t->files); e != list_end (&t->files);
+  for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
     e = list_next (e))
     {
       struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
@@ -379,7 +379,7 @@ tell(int fd)
   struct list_elem *e;
   int return_value = 0;
   lock_acquire(&file_lock);
-  for (e = list_begin (&t->files); e != list_end (&t->files);
+  for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
       e = list_next (e))
   {
     struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
@@ -406,7 +406,7 @@ close(int fd)
   if(fd != 0 && fd != 1)
   {
     struct list_elem *e;
-    for (e = list_begin (&t->files); e != list_end (&t->files);
+    for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
          e = list_next (e))
     {
       struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
