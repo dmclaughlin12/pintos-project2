@@ -14,7 +14,7 @@
 #include <string.h>
 #include "devices/shutdown.h"
 
-#define arg0 ((f->esp +4)
+#define arg0 (int *)((char*) f->esp + 4)
 //int * get_fd_arg(struct intr_frame *f);
 char ** get_buffer_arg(struct intr_frame *f);
 unsigned* get_size_arg(struct intr_frame *f);
