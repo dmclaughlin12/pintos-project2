@@ -89,23 +89,14 @@ struct thread
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
 
-  /*
-  ADDED IN P2
-  */
+    // Variables that we needed for P2. 
     int next_fd;                        /* Holds the next available file descriptor integer */
-
     struct list children;               /* List to hold all the child processes of this process */
-
-    struct list open_files;                  /* List to hold all the open files for this process. */
-
+    struct list open_files;             /* List to hold all the open files for this process. */
     struct shared_data* parent_share;   /* Pointer to hold the data shared with this process' parent (There is only one) */
-
     struct file* executable;            /* Holds the executable file for this process. */
-  /*
-  END ADDED IN P2
-  */
-
     struct list_elem allelem;           /* List element for all threads list. */
+    
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
