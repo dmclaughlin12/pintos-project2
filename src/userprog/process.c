@@ -164,9 +164,9 @@ process_exit (void)
       list_push_back(&cur->children,&data->child_elem);
     }
   }
-  int open_files = list_size(&cur->files);
+  int open_files = list_size(&cur->open_files);
   for(int i = 0; i < open_files; ++i){
-    struct list_elem *e = list_pop_front(&cur->files);
+    struct list_elem *e = list_pop_front(&cur->open_files);
     struct fd_elem *fm = list_entry(e,struct fd_elem,file_elem);
     file_close(fm->file);
     free(fm);
