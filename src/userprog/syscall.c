@@ -14,8 +14,9 @@
 #include <string.h>
 #include "devices/shutdown.h"
 
-#define arg0 (int *)((char*) f->esp + 4)
-char ** get_buffer_arg(struct intr_frame *f);
+#define fisrtArg (int *)((char*) f->esp + 4)
+#define secondArg (char**) ((char*) f->esp +8)
+//char ** get_buffer_arg(struct intr_frame *f);
 unsigned* get_size_arg(struct intr_frame *f);
 void is_valid(void* addr);
 void is_valid_buffer_size(char ** buffer, unsigned* size);
@@ -53,14 +54,14 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_EXIT: {
-      int *status = arg0;
+      int *status = fisrtArg;
       is_valid(status);
       f->eax = *status;
       exit(*status);
       break;
     }
     case SYS_EXEC: {
-      char** buffer = (char**) arg0;
+      char** buffer = (char**) fisrtArg;
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer(buffer);
@@ -68,23 +69,23 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_WAIT: {
-      pid_t *wait_pid = (pid_t*) arg0;
+      pid_t *wait_pid = (pid_t*) fisrtArg;
       is_valid(wait_pid);
       f->eax = wait(*wait_pid);
       break;
     }
     case SYS_CREATE: {
-      char** buffer = (char**) arg0;
+      char** buffer = (char**) fisrtArg;
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer(buffer);
-      unsigned *size = (unsigned*) get_buffer_arg(f);
+      unsigned *size = (unsigned*) secondArg;
       is_valid(size);
       f->eax = create(*buffer,*size);
       break;
     }
     case SYS_REMOVE: {
-      char** buffer = (char**) arg0;
+      char** buffer = (char**) fisrtArg;
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer(buffer);
@@ -93,7 +94,7 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_OPEN: {
-      char** buffer = (char**) arg0;
+      char** buffer = (char**) fisrtArg;
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer(buffer);
@@ -102,14 +103,14 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_FILESIZE: {
-      int *fd = arg0;
+      int *fd = fisrtArg;
       is_valid(fd);
       f->eax = filesize(*fd);
       break;
     }
     case SYS_READ: {
-      int* fd = arg0;
-      char** buffer = get_buffer_arg(f);
+      int* fd = fisrtArg;
+      char** buffer = secondArg;
       unsigned* size = get_size_arg(f);
       is_valid(fd);
       is_valid(buffer);
@@ -119,11 +120,11 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_WRITE: {
-      int* fd = arg0;
+      int* fd = fisrtArg;
       is_valid(fd);
       unsigned* size = get_size_arg(f);
       is_valid(size);
-      char** buffer = get_buffer_arg(f);
+      char** buffer = secondArg;
       is_valid(buffer);
       is_valid(*buffer);
       is_valid_buffer_size(buffer, size);
@@ -131,21 +132,21 @@ syscall_handler (struct intr_frame *f)
       break;
     }
     case SYS_SEEK: {
-      int* fd = arg0;
+      int* fd = fisrtArg;
       is_valid(fd);
-      unsigned* pos = (unsigned*) get_buffer_arg(f);
+      unsigned* pos = (unsigned*) secondArg;
       is_valid(pos);
       seek(*fd,*pos);
       break;
     }
     case SYS_TELL: {
-      int* fd = arg0;
+      int* fd = fisrtArg;
       is_valid(fd);
       f->eax = tell(*fd);
       break;
     }
     case SYS_CLOSE: {
-      int* fd = arg0;
+      int* fd = fisrtArg;
       is_valid(fd);
       close(*fd);
       break;
@@ -429,10 +430,10 @@ void is_valid(void* addr){
     }
   }
 }
-char ** get_buffer_arg(struct intr_frame *f)
-{
-  return (char**) ((char*) f->esp +8);
-}
+//char ** get_buffer_arg(struct intr_frame *f)
+//{
+ // return (char**) ((char*) f->esp +8);
+//}
 unsigned * get_size_arg(struct intr_frame *f)
 {
   return (unsigned*) ((char*) f->esp + 12);
