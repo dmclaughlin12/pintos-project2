@@ -28,39 +28,26 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
 tid_t
 process_execute (const char *file_name) 
 {
-  //char *fn_copy;
+
   tid_t tid;
   char *first_arg = malloc(strlen(file_name)+1);
-  char* dummy_arg;
+  char* place_holder;
   struct thread* t = thread_current();
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   struct pass_in* data = malloc(sizeof(struct pass_in));
-  //fn_copy = palloc_get_page (0);
   if (data == NULL)
     return TID_ERROR;
-
-  // Parse the first part of the name here. We need it for the thread's name.
   strlcpy(first_arg,file_name,strlen(file_name)+1);
-  strtok_r(first_arg," ",&dummy_arg);
-
-  // Copy the complete command line args into fn_copy. We'll pass this
-  // to the child thread for parsing.
+  strtok_r(first_arg," ",&place_holder);
   data->file_name = malloc(strlen(file_name)+1);
   strlcpy (data->file_name, file_name, strlen(file_name)+1);
-
-  //data->parent = thread_current();
   sema_init(&data->load_sema,0);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (first_arg, PRI_DEFAULT, start_process, data);
-
   sema_down(&data->load_sema);
-
-  // Check if the return value is true.
   if(data->load_success){
-    // If loaded successfully, we know that the child allocated the data
-    // so our pointer is valid.
     list_push_back(&t->children,&data->shared->child_elem);
   }
   else{
@@ -77,25 +64,15 @@ process_execute (const char *file_name)
 static void
 start_process (void *in_data)
 {
-  //char *file_name = file_name_;
   struct intr_frame if_;
-  //bool success;
   struct pass_in *data = (struct pass_in*) in_data;
-
-// Allocate the structure for pass_in data here?
   struct shared_data* share = malloc(sizeof(struct shared_data));
-  // Allocating everything for the shared data.
   sema_init(&share->dead_sema,0);
   lock_init(&share->ref_lock);
   share->tid = thread_current()->tid;
   share->status = -2;
   share->ref_count = 2;
-
   data->shared = share;
-
-  // Add the structure to the parent thread's list.
-  //list_push_front(&data->parent->children,&share->child_elem);
-  // Thread current 
   thread_current()->parent_share = share;
 
   /* Initialize interrupt frame and load executable. */
@@ -107,7 +84,6 @@ start_process (void *in_data)
 
 
   /* If load failed, quit. */
-  //palloc_free_page (data);
   if (!data->load_success){ 
     share->status = -1;
     sema_up(&data->load_sema);
@@ -132,9 +108,7 @@ start_process (void *in_data)
    child of the calling process, or if process_wait() has already
    been successfully called for the given TID, returns -1
    immediately, without waiting.
-
-   This function will be implemented in problem 2-2.  For now, it
-   does nothing. */
+ */
 int
 process_wait (tid_t child_tid) 
 {
@@ -175,12 +149,7 @@ process_exit (void)
     lock_acquire(&cur->parent_share->ref_lock);
     --cur->parent_share->ref_count;
     lock_release(&cur->parent_share->ref_lock);
-    //list_remove(&cur->parent_share->child_elem);
   }
-  
-
-  // Iterate through each child in the list. If the parent outlived the child, 
-  // the parent should deallocate.
   int children_size = list_size(&cur->children);
   for(int i = 0; i < children_size; ++i){
     struct list_elem *e = list_pop_front(&cur->children);
@@ -195,9 +164,6 @@ process_exit (void)
       list_push_back(&cur->children,&data->child_elem);
     }
   }
-
-  // Iterate through each open file. We must close each open file, and deallocate
-  // the memory used.
   int open_files = list_size(&cur->files);
   for(int i = 0; i < open_files; ++i){
     struct list_elem *e = list_pop_front(&cur->files);
@@ -205,8 +171,6 @@ process_exit (void)
     file_close(fm->file);
     free(fm);
   }
-  /* Destroy the current process's page directory and switch back
-     to the kernel-only page directory. */
   file_close(cur->executable);
   pd = cur->pagedir;
   if (pd != NULL) 
@@ -322,14 +286,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
-
-  // New char* for first arg in file_name (The executable name).
   char *exec_name = malloc(strlen(file_name)+1);
-  char* dummy_arg;
+  char* place_holder;
   strlcpy(exec_name,file_name,strlen(file_name)+1);
-  // Get first argument of name.
-  strtok_r(exec_name," ",&dummy_arg);
-
+  strtok_r(exec_name," ",&place_holder);
+  
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
@@ -418,7 +379,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
         }
     }
   
-  // Allocate a new string so we don't modify the original argument.
   char* args_ptr = malloc(strlen(file_name)+1);
   strlcpy(args_ptr,file_name,strlen(file_name)+1);
 
@@ -561,11 +521,8 @@ setup_stack (void **esp, char* in_args)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
-        // Parsing arguments:
-
         char* current, *buffer;
         char *current_arg[WORD_LIMIT];
-
         for(current = strtok_r(in_args," ",&buffer); current != NULL; current = strtok_r(NULL," ",&buffer))
         {
           int size_of_curr = strlen(current)+1;
@@ -573,56 +530,30 @@ setup_stack (void **esp, char* in_args)
           strlcpy(current_arg[index],current,size_of_curr);
           ++index;
         }
-
-        // Stack pointer is set here. Now we can copy over the arguments.
         *esp = PHYS_BASE;
-
-        // Loop to copy arugments.
         char* char_ptrs[WORD_LIMIT];
         for(int i = index-1; i >= 0; --i){
           int size_of_curr = strlen(current_arg[i])+1;
-          // Decrement esp to size of arugment to be copied.
           *esp -= size_of_curr;  
           strlcpy(*esp,current_arg[i],size_of_curr);
           char_ptrs[i] = (char*) *esp;
         }
-        // At this point, all string parts of arguments are on the stack.
-        // We need to:
-        // 1. Word align the next address.
-        // 2. Push NULL pointer.
-        // 3. Push args in reverse order.
-        // 4. Push pointer to argv[0] (argv).
-        // 5. Push argc (count of args, currently in 'index')
-        // 6. Push 'fake' return address.
-
-        // 1. Word Align
-        //    If the current *esp address is not word aligned
-        //    (It's not word-aligned if the either of the lowest two bits are set)
         if((int) *esp & 0x03){
-          // Clear the lowest two bits. 
-          // This gets us the 'closest' next word-aligned address.
           *esp =  (void*) ((int) *esp & ~0x03);
         }
-        // 2. Push NULL pointer
         *esp -= 4;
         memset(*esp,0,4);
-        // 3. Push args in reverse order.
         for(int i = index-1; i >= 0; --i){
           *esp -= 4;
           memcpy(*esp,&char_ptrs[i],4);
         }
-        // 4. Push pointer to argv[0] (argv).
         char** argv = *esp;
         *esp -= 4;
         memcpy(*esp,&argv,4);
-        // 5. Push argc (count of args, currently in 'index').
         *esp -= 4;
         memcpy(*esp,&index,4);
-        // 6. Push 'fake' return address.
         *esp -= 4;
         memset(*esp,0,4);
-        //*esp -= 4;
-        //printf("esp =%x\n",*esp);
       }
       else
         palloc_free_page (kpage);
