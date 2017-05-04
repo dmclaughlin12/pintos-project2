@@ -16,8 +16,8 @@
 
 #define fisrtArg (int *)((char*) f->esp + 4)
 #define secondArg (char**) ((char*) f->esp +8)
-//char ** get_buffer_arg(struct intr_frame *f);
-unsigned* get_size_arg(struct intr_frame *f);
+#define thirdArg =  ((char*) f->esp + 12)
+//unsigned* get_size_arg(struct intr_frame *f);
 void is_valid(void* addr);
 void is_valid_buffer_size(char ** buffer, unsigned* size);
 void is_valid_buffer(char ** buffer);
@@ -111,7 +111,7 @@ syscall_handler (struct intr_frame *f)
     case SYS_READ: {
       int* fd = fisrtArg;
       char** buffer = secondArg;
-      unsigned* size = get_size_arg(f);
+      unsigned* size = thirdArg;
       is_valid(fd);
       is_valid(buffer);
       is_valid(size);
@@ -122,7 +122,7 @@ syscall_handler (struct intr_frame *f)
     case SYS_WRITE: {
       int* fd = fisrtArg;
       is_valid(fd);
-      unsigned* size = get_size_arg(f);
+      unsigned* size = thirdArg;
       is_valid(size);
       char** buffer = secondArg;
       is_valid(buffer);
@@ -430,14 +430,10 @@ void is_valid(void* addr){
     }
   }
 }
-//char ** get_buffer_arg(struct intr_frame *f)
+//unsigned * get_size_arg(struct intr_frame *f)
 //{
- // return (char**) ((char*) f->esp +8);
+ // return (unsigned*);
 //}
-unsigned * get_size_arg(struct intr_frame *f)
-{
-  return (unsigned*) ((char*) f->esp + 12);
-}
 void is_valid_buffer_size(char ** buffer, unsigned * size)
 {
     for(unsigned int i = 0; i < *size; ++i){
