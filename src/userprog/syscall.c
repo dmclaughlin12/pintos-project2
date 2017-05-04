@@ -17,7 +17,6 @@
 #define fisrtArg (int *)((char*) f->esp + 4)
 #define secondArg (char**) ((char*) f->esp +8)
 #define thirdArg   ((char*) f->esp + 12)
-//unsigned* get_size_arg(struct intr_frame *f);
 void is_valid(void* addr);
 void is_valid_buffer_size(char ** buffer, unsigned* size);
 void is_valid_buffer(char ** buffer);
@@ -430,10 +429,7 @@ void is_valid(void* addr){
     }
   }
 }
-//unsigned * get_size_arg(struct intr_frame *f)
-//{
- // return (unsigned*);
-//}
+
 void is_valid_buffer_size(char ** buffer, unsigned * size)
 {
     for(unsigned int i = 0; i < *size; ++i){
