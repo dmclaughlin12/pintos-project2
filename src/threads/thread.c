@@ -163,7 +163,7 @@ thread_print_stats (void)
    Priority scheduling is the goal of Problem 1-3. */
 tid_t
 thread_create (const char *name, int priority,
-               thread_func *function, void *aux, struct child* child) 
+               thread_func *function, void *aux) 
 {
   struct thread *t;
   struct kernel_thread_frame *kf;
@@ -479,9 +479,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   t->next_fd = 2;
   // Initialize list of children for the thread.
-  list_init(&t->list_of_children);
+  list_init(&t->children);
   // Initialize list of files for the process.
-  list_init(&t->open_files);
+  list_init(&t->files);
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
   intr_set_level (old_level);

@@ -97,18 +97,18 @@ struct thread
     struct list open_files;           
     /* Pointer to the childs data that is being shared with the parent process.*/  
     struct shared_data* child_is_sharing;
-    /* Struct that contains the executable for the current process.*/  
+    /* Holds the executable file for this process. */  
     struct file* exec;
     /* List element for all threads list. */    
     struct list_elem allelem;           
     
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-    struct child *child;
+
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-    struct list children;
 #endif
 
     /* Owned by thread.c. */
@@ -131,15 +131,6 @@ struct shared_data {
     struct list_elem child_elem;
 };
 
-struct child {
-  struct list_elem elem;
-  tid_t tid;
-  int exit_status;
-  struct semaphore wait;
-  struct semaphore loading_sema;
-  bool loaded_correctly;
-  struct semaphore free_sema;
-};
 /*
     struct file_map
 
@@ -165,10 +156,8 @@ void thread_tick (void);
 void thread_print_stats (void);
 
 typedef void thread_func (void *aux);
-//tid_t thread_create (const char *name, int priority, thread_func *, void *);
+tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
-thread_create (const char *name, int priority,
-               thread_func *function, void *aux, struct child* child)
 void thread_block (void);
 void thread_unblock (struct thread *);
 
