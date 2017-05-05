@@ -37,9 +37,9 @@ process_execute (const char *file_name)
   struct pass_in* data = malloc(sizeof(struct pass_in));
   if (data == NULL)
     return TID_ERROR;
+
   strlcpy(first_arg,file_name,strlen(file_name)+1);
   strtok_r(first_arg," ",&place_holder);
-  data->file_name = malloc(strlen(file_name)+1);
   strlcpy (data->file_name, file_name, strlen(file_name)+1);
   sema_init(&data->load_sema,0);
 
