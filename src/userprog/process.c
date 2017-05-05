@@ -19,6 +19,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
+#define SPACE_BETWEEN_ARGS 4
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 /* Starts a new thread running a user program loaded from
@@ -547,22 +548,25 @@ setup_stack (void **esp, char* in_args)
           strlcpy(*esp,current_arg[i],size_of_current_argument);
           char_ptrs[i] = (char*) *esp;
         }
+        /* We need to align the current word. */
         if((int) *esp & 0x03){
           *esp =  (void*) ((int) *esp & ~0x03);
         }
-        *esp -= 4;
-        memset(*esp,0,4);
+	/* Here push the arguments onto the stack in reverse order.  
+	 * We get the count of arguments and push on a dummy return address.*/
+        *esp -=  SPACE_BETWEEN_ARGS;
+        memset(*esp,0, SPACE_BETWEEN_ARGS);
         for(int i = index-1; i >= 0; i--){
-          *esp -= 4;
-          memcpy(*esp,&char_ptrs[i],4);
+          *esp -=  SPACE_BETWEEN_ARGS;
+          memcpy(*esp,&char_ptrs[i], SPACE_BETWEEN_ARGS);
         }
         char** argv = *esp;
-        *esp -= 4;
-        memcpy(*esp,&argv,4);
-        *esp -= 4;
-        memcpy(*esp,&index,4);
-        *esp -= 4;
-        memset(*esp,0,4);
+        *esp -=  SPACE_BETWEEN_ARGS;
+        memcpy(*esp,&argv, SPACE_BETWEEN_ARGS);
+        *esp -=  SPACE_BETWEEN_ARGS;
+        memcpy(*esp,&index, SPACE_BETWEEN_ARGS);
+        *esp -=  SPACE_BETWEEN_ARGS;
+        memset(*esp,0, SPACE_BETWEEN_ARGS);
       }
       else
         palloc_free_page (kpage);
