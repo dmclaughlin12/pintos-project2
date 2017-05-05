@@ -29,6 +29,7 @@ int wait(pid_t pid);
 bool create (const char*file, unsigned initial_size);
 bool remove(const char *file);
 int open (const char *file);
+int read(int fd, void *buffer, unsigned size);
 int filesize(intfd);
 void seek(int fd, unsigned position);
 unsigned tell(int fd);
@@ -114,7 +115,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(buffer);
       is_valid(size);
       is_valid_buffer_size(buffer, size);
-      f->eax = s_read(*fd,*buffer,*size);
+      f->eax = read(*fd,(void *) buffer,*size);
       break;
     }
     case SYS_WRITE: {
@@ -277,7 +278,9 @@ filesize(int fd)
   return return_value;
 }
 
-int s_read(int fd, char* buf, unsigned size){
+int 
+read(int fd, void* buf, unsigned size)
+{
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize return_value to 0.
