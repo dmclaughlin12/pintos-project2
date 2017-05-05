@@ -114,7 +114,7 @@ syscall_handler (struct intr_frame *f)
       is_valid(buffer);
       is_valid(size);
       is_valid_buffer_size(buffer, size);
-      f->eax = read(*fd,*buffer,*size);
+      f->eax = sys_read(*fd,*buffer,*size);
       break;
     }
     case SYS_WRITE: {
@@ -278,7 +278,7 @@ filesize(int fd)
 }
 
 int 
-read(int fd, char* buf, unsigned size)
+sys_read(int fd, char* buf, unsigned size)
 {
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
