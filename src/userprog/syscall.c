@@ -29,7 +29,6 @@ int wait(pid_t pid);
 bool create (const char*file, unsigned initial_size);
 bool remove(const char *file);
 int open (const char *file);
-int read(int fd, char* buf, unsigned size);
 int filesize(intfd);
 void seek(int fd, unsigned position);
 unsigned tell(int fd);
@@ -278,7 +277,9 @@ filesize(int fd)
   return return_value;
 }
 
-int read(int fd, char* buf, unsigned size){
+int 
+read(int fd, char* buf, unsigned size)
+{
     // Acquire the file operation lock.
     lock_acquire(&file_lock);
     // Initialize return_value to 0.
