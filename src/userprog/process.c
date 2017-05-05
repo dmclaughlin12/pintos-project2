@@ -536,7 +536,7 @@ setup_stack (void **esp, char* in_args)
           int size_of_current_argument = strlen(current)+1;
           current_arg[index] = malloc(size_of_current_argument);
           strlcpy(current_arg[index],current,size_of_current_argument);
-          ++index;
+          index++;
         }
         *esp = PHYS_BASE;
         /* Here we copy the arguments. */
