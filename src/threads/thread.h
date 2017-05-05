@@ -131,6 +131,15 @@ struct shared_data {
     struct list_elem child_elem;
 };
 
+struct child {
+  struct list_elem;
+  tid_t tid;
+  int exit_status;
+  struct semaphore wait;
+  struct semaphore loading_sema;
+  bool loaded_correctly;
+  struct semaphore free_sema;
+}
 /*
     struct file_map
 
