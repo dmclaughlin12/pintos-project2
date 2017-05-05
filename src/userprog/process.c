@@ -28,54 +28,35 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
 tid_t
 process_execute (const char *file_name) 
 {
- char *fn_copy;
-  tid_t tid;
-
-  /* Make a copy of FILE_NAME.
-     Otherwise there's a race between the caller and load(). */
-  fn_copy = palloc_get_page (0);
-  if (fn_copy == NULL)
-    return TID_ERROR;
-  strlcpy (fn_copy, file_name, PGSIZE);
-
-  // Get parsed file name
-  char *save_ptr;
-  file_name = strtok_r((char *) file_name, " ", &save_ptr);
-
-  /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
-  if (tid == TID_ERROR)
-    palloc_free_page (fn_copy);
-  return tid;
 //was working
- // tid_t tid;
- // char *first_arg = malloc(strlen(file_name)+1);
- // char* place_holder;
- // struct thread* t = thread_current();
+  tid_t tid;
+  char *first_arg = malloc(strlen(file_name)+1);
+  char* place_holder;
+  struct thread* t = thread_current();
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
-//  struct pass_in* data = malloc(sizeof(struct pass_in));
-//  if (data == NULL)
- //   return TID_ERROR;
-//  strlcpy(first_arg,file_name,strlen(file_name)+1);
-//  strtok_r(first_arg," ",&place_holder);
-//  data->file_name = malloc(strlen(file_name)+1);
-//  strlcpy (data->file_name, file_name, strlen(file_name)+1);
-//  sema_init(&data->load_sema,0);
+  struct pass_in* data = malloc(sizeof(struct pass_in));
+  if (data == NULL)
+    return TID_ERROR;
+  strlcpy(first_arg,file_name,strlen(file_name)+1);
+  strtok_r(first_arg," ",&place_holder);
+  data->file_name = malloc(strlen(file_name)+1);
+  strlcpy (data->file_name, file_name, strlen(file_name)+1);
+  sema_init(&data->load_sema,0);
 
   /* Create a new thread to execute FILE_NAME. */
- // tid = thread_create (first_arg, PRI_DEFAULT, start_process, data);
- // sema_down(&data->load_sema);
- // if(data->load_success){
- //   list_push_back(&t->list_of_children,&data->shared->child_elem);
- // }
- // else{
- //   free(data->shared);
-  //  return -1;
- // }
-  //if (tid == TID_ERROR)
-   // palloc_free_page (data); 
- // return tid;
+  tid = thread_create (first_arg, PRI_DEFAULT, start_process, data);
+  sema_down(&data->load_sema);
+  if(data->load_success){
+    list_push_back(&t->list_of_children,&data->shared->child_elem);
+  }
+  else{
+    free(data->shared);
+    return -1;
+  }
+  if (tid == TID_ERROR)
+    palloc_free_page (data); 
+  return tid;
 }
 
 /* A thread function that loads a user process and starts it
