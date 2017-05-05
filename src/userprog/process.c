@@ -73,7 +73,7 @@ start_process (void *in_data)
   share->status = -2;
   share->ref_count = 2;
   data->shared = share;
-  thread_current()->parent_share = share;
+  thread_current()->child_is_sharing = share;
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
@@ -137,18 +137,18 @@ process_exit (void)
   uint32_t *pd;
 
   char* thr_name = thread_name();
-  printf("%s: exit(%d)\n",thr_name,cur->parent_share->status);
-  sema_up(&cur->parent_share->dead_sema);
+  printf("%s: exit(%d)\n",thr_name,cur->child_is_sharing->status);
+  sema_up(&cur->child_is_sharing->dead_sema);
   // If the child outlives the parent, the child must deallocate the
   // shared memory.
-  if(cur->parent_share->ref_count == 1){
-    free(cur->parent_share);
+  if(cur->child_is_sharing->ref_count == 1){
+    free(cur->child_is_sharing);
   }
   // Otherwise, decrement count and let parent deallocate.
-  else if (cur->parent_share->ref_count == 2){
-    lock_acquire(&cur->parent_share->ref_lock);
-    --cur->parent_share->ref_count;
-    lock_release(&cur->parent_share->ref_lock);
+  else if (cur->child_is_sharing->ref_count == 2){
+    lock_acquire(&cur->child_is_sharing->ref_lock);
+    --cur->child_is_sharing->ref_count;
+    lock_release(&cur->child_is_sharing->ref_lock);
   }
   int children_size = list_size(&cur->children);
   for(int i = 0; i < children_size; ++i){

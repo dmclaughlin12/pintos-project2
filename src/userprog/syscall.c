@@ -173,7 +173,7 @@ void
 exit(int status)
 {
   struct thread *t = thread_current();
-  t->parent_share->status = status;
+  t->child_is_sharing->status = status;
   thread_exit();
 }
 
