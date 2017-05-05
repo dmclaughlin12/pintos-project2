@@ -150,7 +150,7 @@ process_exit (void)
   }
   else if (cur->child_is_sharing->ref_count == 2){
     lock_acquire(&cur->child_is_sharing->ref_lock);
-    --cur->child_is_sharing->ref_count;
+    cur-- ->child_is_sharing->ref_count;
     lock_release(&cur->child_is_sharing->ref_lock);
   }
   int number_of_children = list_size(&cur->list_of_children);
@@ -162,7 +162,7 @@ process_exit (void)
     }
     else if (data->ref_count == 2){
       lock_acquire(&data->ref_lock);
-      --data->ref_count;
+      data-- ->ref_count;
       lock_release(&data->ref_lock);
       list_push_back(&cur->list_of_children,&data->child_elem);
     }
