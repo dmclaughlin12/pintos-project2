@@ -479,7 +479,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   t->next_fd = 2;
   // Initialize list of children for the thread.
-  list_init(&t->children);
+  list_init(&t->list_of_children);
   // Initialize list of files for the process.
   list_init(&t->open_files);
   old_level = intr_disable ();
