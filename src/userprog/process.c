@@ -173,6 +173,8 @@ process_exit (void)
     file_close(fm->file);
     free(fm);
   }
+  /* Go Back to the kernel page directory. */:wq
+	  
   file_close(cur->exec);
   pd = cur->pagedir;
   if (pd != NULL) 
@@ -288,6 +290,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
+  /* Creating a new pointer for the name of the executable. 
+   * And getting the first argument.
+   */
   char *exec_name = malloc(strlen(file_name)+1);
   char* place_holder;
   strlcpy(exec_name,file_name,strlen(file_name)+1);
@@ -380,7 +385,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
           break;
         }
     }
-  
+  /*  We need to create a new string so that we don't alter 
+   *  the original argument.
+   */
   char* args_ptr = malloc(strlen(file_name)+1);
   strlcpy(args_ptr,file_name,strlen(file_name)+1);
 
@@ -397,7 +404,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
  done:
   /* We arrive here whether the load is successful or not. */
   free(exec_name);
-  //file_close (file);
   return success;
 }
 
@@ -523,21 +529,21 @@ setup_stack (void **esp, char* in_args)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
-        char* current, *buffer;
+        char *current, *buffer;
         char *current_arg[WORD_LIMIT];
         for(current = strtok_r(in_args," ",&buffer); current != NULL; current = strtok_r(NULL," ",&buffer))
         {
-          int size_of_curr = strlen(current)+1;
-          current_arg[index] = malloc(size_of_curr);
-          strlcpy(current_arg[index],current,size_of_curr);
+          int size_of_current_argument = strlen(current)+1;
+          current_arg[index] = malloc(size_of_current_argument);
+          strlcpy(current_arg[index],current,size_of_current_argument);
           ++index;
         }
         *esp = PHYS_BASE;
         char* char_ptrs[WORD_LIMIT];
         for(int i = index-1; i >= 0; --i){
-          int size_of_curr = strlen(current_arg[i])+1;
-          *esp -= size_of_curr;  
-          strlcpy(*esp,current_arg[i],size_of_curr);
+          int size_of_current_argument = strlen(current_arg[i])+1;
+          *esp -= size_of_current_argument;  
+          strlcpy(*esp,current_arg[i],size_of_current_argument);
           char_ptrs[i] = (char*) *esp;
         }
         if((int) *esp & 0x03){
