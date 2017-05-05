@@ -48,7 +48,7 @@ process_execute (const char *file_name)
   tid = thread_create (first_arg, PRI_DEFAULT, start_process, data);
   sema_down(&data->load_sema);
   if(data->load_success){
-    list_push_back(&t->children,&data->shared->child_elem);
+    list_push_back(&t->list_of_children,&data->shared->child_elem);
   }
   else{
     free(data->shared);
@@ -114,7 +114,7 @@ process_wait (tid_t child_tid)
 {
   struct thread* t = thread_current();
   struct list_elem *e;
-  for (e = list_begin (&t->children); e != list_end (&t->children);
+  for (e = list_begin (&t->list_of_children); e != list_end (&t->list_of_children);
        e = list_next (e))
   {
       struct shared_data* share = list_entry (e, struct shared_data, child_elem);
@@ -150,9 +150,9 @@ process_exit (void)
     --cur->child_is_sharing->ref_count;
     lock_release(&cur->child_is_sharing->ref_lock);
   }
-  int children_size = list_size(&cur->children);
+  int children_size = list_size(&cur->list_of_children);
   for(int i = 0; i < children_size; ++i){
-    struct list_elem *e = list_pop_front(&cur->children);
+    struct list_elem *e = list_pop_front(&cur->list_of_children);
     struct shared_data* data = list_entry(e,struct shared_data,child_elem);
     if(data->ref_count == 1){
       free(data);
@@ -161,7 +161,7 @@ process_exit (void)
       lock_acquire(&data->ref_lock);
       --data->ref_count;
       lock_release(&data->ref_lock);
-      list_push_back(&cur->children,&data->child_elem);
+      list_push_back(&cur->list_of_children,&data->child_elem);
     }
   }
   int open_files = list_size(&cur->open_files);

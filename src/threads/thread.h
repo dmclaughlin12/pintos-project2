@@ -91,7 +91,7 @@ struct thread
 
     // Variables that we needed for P2. 
     int next_fd;                        /* Holds the next available file descriptor integer */
-    struct list children;               /* List to hold all the child processes of this process */
+    struct list list_of_children;               /* List to hold all the child processes of this process */
     struct list open_files;             /* List to hold all the open files for this process. */
     struct shared_data* child_is_sharing;   /* Pointer to hold the data shared with this process' parent (There is only one) */
     struct file* executable;            /* Holds the executable file for this process. */
