@@ -280,14 +280,21 @@ filesize(int fd)
 int 
 sys_read(int fd, char* buf, unsigned size)
 {
+    // Acquire the file operation lock.
     lock_acquire(&file_lock);
+    // Initialize return_value to 0.
     int return_value = 0;
+    // Check if this is a console read.
     if(fd == 0){
+      // Get as many characters from the console as specified in
+      // The size argument.
       for(unsigned int i = 0; i < size; ++i){
         buf[i] = input_getc();
       }
         return_value = size;
     }
+    // Otherwise, it is a file read. Search for the file in the thread's
+    // file descriptor list.
     else{
       struct thread* t = thread_current();
       struct list_elem *e;
@@ -296,22 +303,31 @@ sys_read(int fd, char* buf, unsigned size)
         {
           struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
           if(fd_e->fd == fd){
+            // If found read the file.
             return_value = file_read(fd_e->file,buf,size);
             break;
           }
         }
     }
+    // Release the file operation lock.
     lock_release(&file_lock);
+    // Return the number of bytes read.
     return return_value;
 }
 int 
 sys_write(int fd, char* buf, unsigned size)
 {
+      // Get the file operation lock.
+      lock_acquire(&file_lock);
+      // Initialize return value to 0.
       int return_value = 0;
+      // If this is a console write, call putbuf().
       if (fd == 1){
         putbuf(buf,size);
         return_value = size;
       }
+      // Otherwise, this is a file write, so search for the correct file
+      // descriptor in the thread's fd_elem.
       else{
         struct thread* t = thread_current();
         struct list_elem *e;
@@ -320,11 +336,13 @@ sys_write(int fd, char* buf, unsigned size)
           {
             struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
             if(fd_e->fd == fd){
+              // Write to the file if found.
               return_value = file_write(fd_e->file,buf,size);
               break;
             }
           }
       }
+      // Release the file operation lock.
       lock_release(&file_lock);
       return return_value;
 }
