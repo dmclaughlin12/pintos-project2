@@ -94,7 +94,7 @@ struct thread
     struct list list_of_children;               /* List to hold all the child processes of this process */
     struct list open_files;             /* List to hold all the open files for this process. */
     struct shared_data* child_is_sharing;   /* Pointer to hold the data shared with this process' parent (There is only one) */
-    struct file* executable;            /* Holds the executable file for this process. */
+    struct file* exec;            /* Holds the executable file for this process. */
     struct list_elem allelem;           /* List element for all threads list. */
     
     /* Shared between thread.c and synch.c. */

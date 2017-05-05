@@ -171,7 +171,7 @@ process_exit (void)
     file_close(fm->file);
     free(fm);
   }
-  file_close(cur->executable);
+  file_close(cur->exec);
   pd = cur->pagedir;
   if (pd != NULL) 
     {
@@ -306,7 +306,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }else{
         file_deny_write(file);
     }
-  t->executable = file;
+  t->exec = file;
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)
