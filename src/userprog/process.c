@@ -19,8 +19,6 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
-#define PAGE_IS_NOT_FREED  *esp & 0x03
-
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 /* Starts a new thread running a user program loaded from
@@ -549,8 +547,8 @@ setup_stack (void **esp, char* in_args)
           strlcpy(*esp,current_arg[i],size_of_current_argument);
           char_ptrs[i] = (char*) *esp;
         }
-        if((int)  PAGE_IS_NOT_FREED){
-          *esp =  (void*) ((int) PAGE_IS_NOT_FREED);
+        if((int) *esp & 0x03){
+          *esp =  (void*) ((int) *esp & ~0x03);
         }
         *esp -= 4;
         memset(*esp,0,4);
