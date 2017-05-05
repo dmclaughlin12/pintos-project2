@@ -116,12 +116,8 @@ struct thread
   };
 
 /*
-    struct shared_data
-
-    Holds data that needs to be shared between each parent process and its children.
-    Each shared_data struct is initialized by the child process, but can be de-allocated
-    by either the parent of child, depending on which process exits first.
-*/
+ * This struct is used to hold all of the data that will be shared between 
+ * a parent and child process. */
 struct shared_data {
     int ref_count;
     struct lock ref_lock;
@@ -131,17 +127,13 @@ struct shared_data {
     struct list_elem child_elem;
 };
 
-/*
-    struct file_map
-
-    Holds a mapping between an integer "file descriptor" and the underlying 
-    struct file*. File descriptors are unique per process (not globally), and
-    are removed when the file is closed.
-*/
 struct fd_elem {
-  int fd;                               /* Holds the file descriptor for this file. */
-  struct file* file;                    /* Holds the actual file* for this file. */
-  struct list_elem file_elem;           /* Allows the file to be an element in a list. */
+  /* Variable to hold the file descriptor. */
+  int fd; 
+  /*  Struct to hold the file pointer of the current file. */  
+  struct file* file;              
+  /* This lets us put the file into a list. */
+  struct list_elem file_elem;       
 };
 
 /* If false (default), use round-robin scheduler.
