@@ -133,11 +133,11 @@ struct shared_data {
     struct file*. File descriptors are unique per process (not globally), and
     are removed when the file is closed.
 */
-//struct fd_elem {
-  //int fd;                               /* Holds the file descriptor for this file. */
-  //struct file* file;                    /* Holds the actual file* for this file. */
-  //struct list_elem file_elem;           /* Allows the file to be an element in a list. */
-//};
+struct fd_elem {
+  int fd;                               /* Holds the file descriptor for this file. */
+  struct file* file;                    /* Holds the actual file* for this file. */
+  struct list_elem file_elem;           /* Allows the file to be an element in a list. */
+};
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
