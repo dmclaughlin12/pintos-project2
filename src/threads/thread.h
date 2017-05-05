@@ -139,7 +139,7 @@ struct child {
   struct semaphore loading_sema;
   bool loaded_correctly;
   struct semaphore free_sema;
-}
+};
 /*
     struct file_map
 
