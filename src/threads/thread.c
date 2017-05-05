@@ -163,7 +163,7 @@ thread_print_stats (void)
    Priority scheduling is the goal of Problem 1-3. */
 tid_t
 thread_create (const char *name, int priority,
-               thread_func *function, void *aux, sturct child* child) 
+               thread_func *function, void *aux, struct child* child) 
 {
   struct thread *t;
   struct kernel_thread_frame *kf;
