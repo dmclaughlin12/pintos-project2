@@ -104,8 +104,7 @@ struct thread
     
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
-
-
+    struct child *child;
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -132,7 +131,7 @@ struct shared_data {
 };
 
 struct child {
-  struct list_elem;
+  struct list_elem elem;
   tid_t tid;
   int exit_status;
   struct semaphore wait;
