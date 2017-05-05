@@ -385,7 +385,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
           break;
         }
     }
-  /*  We need to create a new string so that we don't alter 
+  /*  We need to create a new string so that we don't change 
    *  the original argument.
    */
   char* args_ptr = malloc(strlen(file_name)+1);
@@ -539,8 +539,9 @@ setup_stack (void **esp, char* in_args)
           ++index;
         }
         *esp = PHYS_BASE;
+        /* Here we copy the arguments. */
         char* char_ptrs[WORD_LIMIT];
-        for(int i = index-1; i >= 0; --i){
+        for(int i = index-1; i >= 0; i--){
           int size_of_current_argument = strlen(current_arg[i])+1;
           *esp -= size_of_current_argument;  
           strlcpy(*esp,current_arg[i],size_of_current_argument);
@@ -551,7 +552,7 @@ setup_stack (void **esp, char* in_args)
         }
         *esp -= 4;
         memset(*esp,0,4);
-        for(int i = index-1; i >= 0; --i){
+        for(int i = index-1; i >= 0; i--){
           *esp -= 4;
           memcpy(*esp,&char_ptrs[i],4);
         }
