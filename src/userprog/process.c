@@ -173,7 +173,7 @@ process_exit (void)
     file_close(fm->file);
     free(fm);
   }
-  /* Go Back to the kernel page directory. */:wq
+  /* Go Back to the kernel page directory. */
 	  
   file_close(cur->exec);
   pd = cur->pagedir;
