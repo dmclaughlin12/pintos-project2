@@ -17,6 +17,7 @@
 #define fisrtArg (int *)((char*) f->esp + 4)
 #define secondArg (char**) ((char*) f->esp +8)
 #define thirdArg   ((char*) f->esp + 12)
+
 void is_valid(void* addr);
 void is_valid_buffer_size(char ** buffer, unsigned* size);
 void is_valid_buffer(char ** buffer);
@@ -34,6 +35,14 @@ void seek(int fd, unsigned position);
 unsigned tell(int fd);
 void close(int fd);
 
+struct fd_elem {
+  /* Variable to hold the file descriptor. */
+  int fd; 
+  /*  Struct to hold the file pointer of the current file. */  
+  struct file* file;              
+  /* This lets us put the file into a list. */
+  struct list_elem file_elem;       
+};
 void
 syscall_init (void) 
 {
@@ -111,8 +120,8 @@ syscall_handler (struct intr_frame *f)
       char** buffer = secondArg;
       unsigned* size = thirdArg;
       is_valid(fd);
-     // is_valid(buffer);
-      //is_valid(size);
+      is_valid(buffer);
+      is_valid(size);
       is_valid_buffer_size(buffer, size);
       f->eax = sys_read(*fd,*buffer,*size);
       break;
@@ -317,17 +326,12 @@ sys_read(int fd, char* buf, unsigned size)
 int 
 sys_write(int fd, char* buf, unsigned size)
 {
-      // Get the file operation lock.
       lock_acquire(&file_lock);
-      // Initialize return value to 0.
       int return_value = 0;
-      // If this is a console write, call putbuf().
       if (fd == 1){
         putbuf(buf,size);
         return_value = size;
       }
-      // Otherwise, this is a file write, so search for the correct file
-      // descriptor in the thread's fd_elem.
       else{
         struct thread* t = thread_current();
         struct list_elem *e;
@@ -336,13 +340,11 @@ sys_write(int fd, char* buf, unsigned size)
           {
             struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
             if(fd_e->fd == fd){
-              // Write to the file if found.
               return_value = file_write(fd_e->file,buf,size);
               break;
             }
           }
       }
-      // Release the file operation lock.
       lock_release(&file_lock);
       return return_value;
 }
@@ -354,7 +356,6 @@ sys_write(int fd, char* buf, unsigned size)
 void 
 seek(int fd, unsigned position)
 {
-  // Get the file operation lock.
   lock_acquire(&file_lock);
   struct thread* t = thread_current();
   struct list_elem *e;
