@@ -111,8 +111,8 @@ syscall_handler (struct intr_frame *f)
       char** buffer = secondArg;
       unsigned* size = thirdArg;
       is_valid(fd);
-      is_valid(buffer);
-      is_valid(size);
+     // is_valid(buffer);
+      //is_valid(size);
       is_valid_buffer_size(buffer, size);
       f->eax = sys_read(*fd,*buffer,*size);
       break;
