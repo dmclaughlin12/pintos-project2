@@ -118,9 +118,9 @@ struct thread
 /*
  * This struct is used to hold all of the data that will be shared between 
  * a parent and child process. */
-struct shared_data {
-    int ref_count;
-    struct lock ref_lock;
+struct data_in_both {
+    int count;
+    struct lock both_lock;
     int status;
     tid_t tid;
     struct semaphore dead_sema;
