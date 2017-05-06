@@ -127,6 +127,13 @@ struct data_in_both {
     struct list_elem child_elem;
 };
 
+struct pass_in {
+    bool load_success;
+    char* file_name;
+    struct semaphore load_sema;
+    struct data_in_both* shared;
+};
+
 struct fd_elem {
   /* Variable to hold the file descriptor. */
   int fd; 

@@ -9,13 +9,6 @@ void process_exit (void);
 void process_activate (void);
 
 
-struct pass_in {
-    bool load_success;
-    char* file_name;
-    struct semaphore load_sema;
-    struct data_in_both* shared;
-};
-
 
 #endif /* userprog/process.h */
 
