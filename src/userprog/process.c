@@ -156,7 +156,7 @@ process_exit (void)
   int number_of_children = list_size(&cur->list_of_children);
   for(int i = 0; i < number_of_children; ++i){
     struct list_elem *e = list_pop_front(&cur->list_of_children);
-    struct shared_data* data = list_entry(e,struct shared_data,child_elem);
+    struct data_in_both* data = list_entry(e,struct shared_data,child_elem);
     if(data->ref_count == 1){
       free(data);
     }
