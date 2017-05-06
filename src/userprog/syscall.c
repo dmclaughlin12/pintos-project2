@@ -35,14 +35,6 @@ void seek(int fd, unsigned position);
 unsigned tell(int fd);
 void close(int fd);
 
-struct fd_elem {
-  /* Variable to hold the file descriptor. */
-  int fd; 
-  /*  Struct to hold the file pointer of the current file. */  
-  struct file* file;              
-  /* This lets us put the file into a list. */
-  struct list_elem file_elem;       
-};
 void
 syscall_init (void) 
 {
