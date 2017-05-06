@@ -72,10 +72,10 @@ start_process (void *in_data)
   struct shared_data* share = malloc(sizeof(struct shared_data));
   /* We need get everything set up for sharing data. */
   sema_init(&share->dead_sema,0);
-  lock_init(&share->ref_lock);
+  lock_init(&share->both_lock);
   share->tid = thread_current()->tid;
   share->status = -2;
-  share->ref_count = 2;
+  share->count = 2;
   data->shared = share;
 
   thread_current()->child_is_sharing = share;
@@ -145,25 +145,25 @@ process_exit (void)
   printf("%s: exit(%d)\n",thr_name,cur->child_is_sharing->status);
   sema_up(&cur->child_is_sharing->dead_sema);
   /* If the child lives longer than its parent we free the share memory. */
-  if(cur->child_is_sharing->ref_count == 1){
+  if(cur->child_is_sharing->count == 1){
     free(cur->child_is_sharing);
   }
-  else if (cur->child_is_sharing->ref_count == 2){
-    lock_acquire(&cur->child_is_sharing->ref_lock);
-    --cur ->child_is_sharing->ref_count;
-    lock_release(&cur->child_is_sharing->ref_lock);
+  else if (cur->child_is_sharing->count == 2){
+    lock_acquire(&cur->child_is_sharing->both_lock);
+    --cur ->child_is_sharing->count;
+    lock_release(&cur->child_is_sharing->both_lock);
   }
   int number_of_children = list_size(&cur->list_of_children);
   for(int i = 0; i < number_of_children; ++i){
     struct list_elem *e = list_pop_front(&cur->list_of_children);
     struct data_in_both* data = list_entry(e,struct shared_data,child_elem);
-    if(data->ref_count == 1){
+    if(data->count == 1){
       free(data);
     }
-    else if (data->ref_count == 2){
-      lock_acquire(&data->ref_lock);
-      --data ->ref_count;
-      lock_release(&data->ref_lock);
+    else if (data->count == 2){
+      lock_acquire(&data->both_lock);
+      --data ->count;
+      lock_release(&data->both_lock);
       list_push_back(&cur->list_of_children,&data->child_elem);
     }
   }
