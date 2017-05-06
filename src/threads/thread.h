@@ -96,7 +96,7 @@ struct thread
     /* List that contains any open files in the current process.*/
     struct list open_files;           
     /* Pointer to the childs data that is being shared with the parent process.*/  
-    struct shared_data* child_is_sharing;
+    struct data_in_both* child_is_sharing;
     /* Holds the executable file for this process. */  
     struct file* exec;
     /* List element for all threads list. */    
