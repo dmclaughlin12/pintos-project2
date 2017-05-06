@@ -60,8 +60,8 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_EXEC: {
       char** buffer = (char**) fisrtArg;
-      is_valid(buffer);
-      is_valid(*buffer);
+      //is_valid(buffer);
+     // is_valid(*buffer);
       is_valid_buffer(buffer);
       f->eax = exec(*buffer);
       break;
@@ -74,8 +74,8 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_CREATE: {
       char** buffer = (char**) fisrtArg;
-      is_valid(buffer);
-      is_valid(*buffer);
+      //is_valid(buffer);
+      //is_valid(*buffer);
       is_valid_buffer(buffer);
       unsigned *size = (unsigned*) secondArg;
       is_valid(size);
@@ -84,8 +84,8 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_REMOVE: {
       char** buffer = (char**) fisrtArg;
-      is_valid(buffer);
-      is_valid(*buffer);
+     // is_valid(buffer);
+     // is_valid(*buffer);
       is_valid_buffer(buffer);
 
       f->eax = remove(*buffer);
@@ -93,8 +93,8 @@ syscall_handler (struct intr_frame *f)
     }
     case SYS_OPEN: {
       char** buffer = (char**) fisrtArg;
-      is_valid(buffer);
-      is_valid(*buffer);
+      //is_valid(buffer);
+      //is_valid(*buffer);
       is_valid_buffer(buffer);
 
       f->eax = open(*buffer);
@@ -121,10 +121,10 @@ syscall_handler (struct intr_frame *f)
       int* fd = fisrtArg;
       is_valid(fd);
       unsigned* size = thirdArg;
-      is_valid(size);
+      //is_valid(size);
       char** buffer = secondArg;
-      is_valid(buffer);
-      is_valid(*buffer);
+      //is_valid(buffer);
+      //is_valid(*buffer);
       is_valid_buffer_size(buffer, size);
       f->eax = sys_write(*fd,*buffer,*size);
       break;
