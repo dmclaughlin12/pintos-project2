@@ -34,6 +34,14 @@ This struct is used to hold all of the data that will be shared between a parent
 and child process.
 
 
+struct give_to_child {
+    bool load_success;
+    char* file_name;
+    struct semaphore load_sema;
+    struct data_in_both* shared;
+};
+Allows the parent to pass its data to the child that it creates. 
+
 ---- ALGORITHMS ----
 
 >> A2: Briefly describe how you implemented argument parsing.  How do
