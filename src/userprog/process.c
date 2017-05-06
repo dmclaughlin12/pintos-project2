@@ -35,7 +35,7 @@ process_execute (const char *file_name)
   struct thread* t = thread_current();
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
-  struct pass_in* data = malloc(sizeof(struct pass_in));
+  struct give_to_child* data = malloc(sizeof(struct give_to_child));
   if (data == NULL)
     return TID_ERROR;
   /* Grab the first par of th file name. */
@@ -68,7 +68,7 @@ static void
 start_process (void *in_data)
 {
   struct intr_frame if_;
-  struct pass_in *data = (struct pass_in*) in_data;
+  struct give_to_child *data = (struct give_to_child*) in_data;
   struct data_in_both* share = malloc(sizeof(struct data_in_both));
   /* We need get everything set up for sharing data. */
   sema_init(&share->dead_sema,0);

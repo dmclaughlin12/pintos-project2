@@ -127,7 +127,7 @@ struct data_in_both {
     struct list_elem child_elem;
 };
 
-struct pass_in {
+struct give_to_child {
     bool load_success;
     char* file_name;
     struct semaphore load_sema;
