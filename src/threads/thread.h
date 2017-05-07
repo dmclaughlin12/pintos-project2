@@ -134,7 +134,7 @@ struct give_to_child {
     struct data_in_both* shared;
 };
 
-struct fd_elem {
+struct map_fd_to_file {
   /* Variable to hold the file descriptor. */
   int fd; 
   /*  Struct to hold the file pointer of the current file. */  
