@@ -3,6 +3,10 @@
 #ifndef USERPROG_SYSCALL_H
 #define USERPROG_SYSCALL_H
 
+/*
+ * This struct maps a fd to a file.  Threads are able to keep track of 
+ * their open files through this.
+ */
 struct map_fd_to_file {
   /* Variable to hold the file descriptor. */
   int fd; 

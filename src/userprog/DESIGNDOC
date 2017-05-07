@@ -72,9 +72,25 @@ a valid executable so the kernel doesn't have to do it.
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+
+struct map_fd_to_file {
+  /* Variable to hold the file descriptor. */
+  int fd; 
+  /*  Struct to hold the file pointer of the current file. */  
+  struct file* file;              
+  /* This lets us put the file into a list. */
+  struct list_elem file_elem;       
+};
+This struct maps a file descriptor to a file.  Threads are then able to keep track of 
+their open files through this struct.
+
 >> B2: Describe how file descriptors are associated with open files.
 >> Are file descriptors unique within the entire OS or just within a
 >> single process?
+
+Each time a file is opened with a system call it is added to the current process's 
+list of open files and assigned a file descriptor.  Which shows that file
+descriptors are uniqe to a single process.
 
 ---- ALGORITHMS ----
 
@@ -88,8 +104,18 @@ a valid executable so the kernel doesn't have to do it.
 >> for a system call that only copies 2 bytes of data?  Is there room
 >> for improvement in these numbers, and how much?
 
+If the system call copies a full page of data then the least possible inspections 
+is one and the most is 4096  inspections. If the system call only copies 2 bytes of 
+data, again the least possible inspecions is 1 howver the most is 2 inspections.  We 
+are usure of how this might be improved.
+
 >> B5: Briefly describe your implementation of the "wait" system call
 >> and how it interacts with process termination.
+
+We used a semaphore to give a parent process the ability to wait for its child
+to exit.  The parent process firs checks that the a child does indeed exist and that 
+the parent has not needed to wait on the child before.  Then the parent process is 
+blocked to allow the child to run. 
 
 >> B6: Any access to user program memory at a user-specified address
 >> can fail due to a bad pointer value.  Such accesses must cause the
@@ -105,6 +131,13 @@ a valid executable so the kernel doesn't have to do it.
 >> paragraphs, describe the strategy or strategies you adopted for
 >> managing these issues.  Give an example.
 
+We validate address in every system call before anything else is done.  If we get an
+invalid adress the function calls thread_exit which calls process_exit().  
+process()_exit then takes care of the all memory deallocation, close files and then "die"
+gracefully.
+
+We perform this validation in each system call prior to obtaining any locks.
+
 ---- SYNCHRONIZATION ----
 
 >> B7: The "exec" system call returns -1 if loading the new executable
@@ -112,6 +145,12 @@ a valid executable so the kernel doesn't have to do it.
 >> loading.  How does your code ensure this?  How is the load
 >> success/failure status passed back to the thread that calls "exec"?
 
+First the parent process is blocked until its child has finished loading.
+Then inside of start_process(), the child process sets the load_success member 
+that struct that it receives from its parent process.  When the parent is 
+rescheduled it can then read the value of the load_success member and decide what
+should happen next.
+ 
 >> B8: Consider parent process P with child process C.  How do you
 >> ensure proper synchronization and avoid race conditions when P
 >> calls wait(C) before C exits?  After C exits?  How do you ensure
@@ -119,6 +158,8 @@ a valid executable so the kernel doesn't have to do it.
 >> terminates without waiting, before C exits?  After C exits?  Are
 >> there any special cases?
 
+We created a struct call data_in_both to keep track of status between 
+the parent and child process's.  I the child process exits before  
 ---- RATIONALE ----
 
 >> B9: Why did you choose to implement access to user memory from the

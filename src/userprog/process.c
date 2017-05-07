@@ -69,7 +69,7 @@ start_process (void *in_data)
 {
   struct intr_frame if_;
   struct give_to_child *data = (struct give_to_child*) in_data;
-  struct data_in_both* share = malloc(sizeof(struct data_in_both));
+  struct child_thread_info* share = malloc(sizeof(struct child_thread_info));
   /* We need get everything set up for sharing data. */
   sema_init(&share->dead_sema,0);
   lock_init(&share->both_lock);
@@ -122,8 +122,9 @@ process_wait (tid_t child_tid)
   for (e = list_begin (&t->list_of_children); e != list_end (&t->list_of_children);
        e = list_next (e))
   {
-      struct data_in_both* share = list_entry (e, struct data_in_both, child_elem);
-      if(share->tid == child_tid){
+      struct child_thread_info* share = list_entry (e, struct child_thread_info, child_elem);
+      if(share->tid == child_tid)
+      {
         sema_down(&share->dead_sema);
         list_remove(&share->child_elem);
         int exit_val = share->status;
@@ -156,7 +157,7 @@ process_exit (void)
   int number_of_children = list_size(&cur->list_of_children);
   for(int i = 0; i < number_of_children; ++i){
     struct list_elem *e = list_pop_front(&cur->list_of_children);
-    struct data_in_both* data = list_entry(e,struct data_in_both,child_elem);
+    struct child_thread_info* data = list_entry(e,struct child_thread_info,child_elem);
     if(data->count == 1){
       free(data);
     }

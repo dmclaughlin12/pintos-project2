@@ -96,7 +96,7 @@ struct thread
     /* List that contains any open files in the current process.*/
     struct list open_files;           
     /* Pointer to the childs data that is being shared with the parent process.*/  
-    struct data_in_both* child_is_sharing;
+    struct child_thread_info* child_is_sharing;
     /* Holds the executable file for this process. */  
     struct file* exec;
     /* List element for all threads list. */    
@@ -118,7 +118,7 @@ struct thread
 /*
  * This struct is used to hold all of the data that will be shared between 
  * a parent and child process. */
-struct data_in_both {
+struct child_thread_info {
     int count;
     struct lock both_lock;
     int status;
@@ -131,7 +131,7 @@ struct give_to_child {
     bool load_success;
     char* file_name;
     struct semaphore load_sema;
-    struct data_in_both* shared;
+    struct child_thread_info* shared;
 };
 
 /* If false (default), use round-robin scheduler.
