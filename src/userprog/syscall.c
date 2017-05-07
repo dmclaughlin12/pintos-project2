@@ -240,7 +240,7 @@ open(const char* file)
   struct thread *t = thread_current();
   int return_value;
   struct file* open_file = filesys_open(file);
-  struct fd_elem* fm = (struct fd_elem*) malloc(sizeof(struct fd_elem));
+  struct map_fd_to_file* fm = (struct map_fd_to_file*) malloc(sizeof(struct map_fd_to_file));
   if(open_file == NULL)
   {
     return_value = -1;
@@ -266,7 +266,7 @@ filesize(int fd)
   for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
     e = list_next (e))
     {
-      struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+      struct map_fd_to_file* fd_e = list_entry (e, struct map_fd_to_file, file_elem);
       if(fd_e->fd == fd)
       {
         return_value = file_length(fd_e->file);
@@ -302,7 +302,7 @@ sys_read(int fd, char* buf, unsigned size)
       for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
         e = list_next (e))
         {
-          struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+          struct map_fd_to_file* fd_e = list_entry (e, struct map_fd_to_file, file_elem);
           if(fd_e->fd == fd){
             // If found read the file.
             return_value = file_read(fd_e->file,buf,size);
@@ -330,7 +330,7 @@ sys_write(int fd, char* buf, unsigned size)
         for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
           e = list_next (e))
           {
-            struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+            struct map_fd_to_file* fd_e = list_entry (e, struct map_fd_to_file, file_elem);
             if(fd_e->fd == fd){
               return_value = file_write(fd_e->file,buf,size);
               break;
@@ -354,7 +354,7 @@ seek(int fd, unsigned position)
   for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
     e = list_next (e))
     {
-      struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+      struct map_fd_to_file* fd_e = list_entry (e, struct map_fd_to_file, file_elem);
       if(fd_e->fd == fd)
       {
         file_seek(fd_e->file,position);
@@ -378,7 +378,7 @@ tell(int fd)
   for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
       e = list_next (e))
   {
-    struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+    struct map_fd_to_file* fd_e = list_entry (e, struct map_fd_to_file, file_elem);
     if(fd_e->fd == fd)
     {
       return_value = file_tell(fd_e->file);
@@ -405,7 +405,7 @@ close(int fd)
     for (e = list_begin (&t->open_files); e != list_end (&t->open_files);
          e = list_next (e))
     {
-      struct fd_elem* fd_e = list_entry (e, struct fd_elem, file_elem);
+      struct map_fd_to_file* fd_e = list_entry (e, struct map_fd_to_file, file_elem);
       if(fd_e->fd == fd)
       {
         list_remove(e);
