@@ -170,7 +170,7 @@ process_exit (void)
   int open_files = list_size(&cur->open_files);
   for(int i = 0; i < open_files; ++i){
     struct list_elem *e = list_pop_front(&cur->open_files);
-    struct fd_map_to_file *fm = list_entry(e,struct fd_map_to_file,file_elem);
+    struct map_fd_to_file *fm = list_entry(e,struct map_fd_to_file,file_elem);
     file_close(fm->file);
     free(fm);
   }
