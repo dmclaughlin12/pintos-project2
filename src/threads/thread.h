@@ -134,15 +134,6 @@ struct give_to_child {
     struct data_in_both* shared;
 };
 
-struct map_fd_to_file {
-  /* Variable to hold the file descriptor. */
-  int fd; 
-  /*  Struct to hold the file pointer of the current file. */  
-  struct file* file;              
-  /* This lets us put the file into a list. */
-  struct list_elem file_elem;       
-};
-
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
